@@ -11,7 +11,7 @@
     {
       "registryType": "mcpb",
       "identifier": "https://github.com/r00tify/crashdx/releases/download/v0.1.0/crashdx-mcp-v0.1.0.mcpb",
-      "fileSha256": "db32828aff4f1cea1e3de7fdb1c54aea46b4cdb7d1598bc6ddb407d121e156b0",
+      "fileSha256": "158a8af29c1c8679b4fe42e144b29704f9553a07176fa808b2c2fb414cce3360",
       "transport": {
         "type": "stdio"
       }

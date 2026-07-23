@@ -29,6 +29,31 @@ jobs:
           mkdir -p mcpb/server
           cp .build/apple/Products/Release/crashdx-mcp mcpb/server/crashdx-mcp
 
+      # The tag is the single source of truth for the version. The value committed in
+      # mcpb/manifest.json is a placeholder — without this the bundle would keep claiming
+      # whatever version was last hand-edited there.
+      - name: Sync manifest version to the tag
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          version = os.environ["REF_NAME"].lstrip("v")
+          path = "mcpb/manifest.json"
+          with open(path) as f:
+              manifest = json.load(f)
+          manifest["version"] = version
+          with open(path, "w") as f:
+              json.dump(manifest, f, indent=2)
+              f.write("\n")
+          print(f"manifest version set to {version}")
+          PY
+
+      # A bundle that does not speak MCP is worse than no bundle, so prove the exact
+      # binary being shipped completes a real handshake before it is published.
+      - name: Verify the staged binary speaks MCP
+        run: python3 Tests/mcp-smoke.py mcpb/server/crashdx-mcp
+
       - name: Install mcpb CLI
         run: npm install -g @anthropic-ai/mcpb
 
@@ -39,8 +64,26 @@ jobs:
       - name: Upload bundle to release
         env:
           GH_TOKEN: ${{ github.token }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          gh release upload "${{ github.ref_name }}" \
-            "mcpb/crashdx-mcp-${{ github.ref_name }}.mcpb" \
-            --repo "${{ github.repository }}" \
+          # A tag can be pushed before its release exists; create it rather than fail.
+          if ! gh release view "$REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$REF_NAME" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "crashdx ${REF_NAME#v}" \
+              --generate-notes
+          fi
+          gh release upload "$REF_NAME" \
+            "mcpb/crashdx-mcp-${REF_NAME}.mcpb" \
+            --repo "$GITHUB_REPOSITORY" \
             --clobber
+
+      # server.json pins the bundle URL and its SHA-256, both of which change every
+      # release. Surface the new hash so the follow-up publish is a copy-paste.
+      - name: Print server.json values for the registry publish
+        run: |
+          echo "Update server.json with:"
+          echo "  version:    ${GITHUB_REF_NAME#v}"
+          echo "  identifier: https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/crashdx-mcp-${GITHUB_REF_NAME}.mcpb"
+          echo -n "  fileSha256: "
+          shasum -a 256 "mcpb/crashdx-mcp-${GITHUB_REF_NAME}.mcpb" | cut -d' ' -f1

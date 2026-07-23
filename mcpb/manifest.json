@@ -23,9 +23,20 @@
     "entry_point": "server/crashdx-mcp",
     "mcp_config": {
       "command": "${__dirname}/server/crashdx-mcp",
-      "args": []
+      "args": [],
+      "env": {}
     }
   },
+  "tools": [
+    {
+      "name": "crashdx_analyze",
+      "description": "Parse, symbolicate, and diagnose an .ips crash report, returning a ranked diagnosis with the evidence behind it."
+    },
+    {
+      "name": "crashdx_symbolicate",
+      "description": "Symbolicate an .ips crash report against its dSYM and return the enriched report."
+    }
+  ],
   "compatibility": {
     "platforms": ["darwin"]
   }

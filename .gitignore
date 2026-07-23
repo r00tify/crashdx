@@ -3,6 +3,11 @@
 DerivedData/
 .DS_Store
 
+# MCPB bundle staging — the release workflow copies the built binary into mcpb/server/
+# and packs the archive there. Only mcpb/manifest.json is tracked.
+mcpb/server/
+*.mcpb
+
 # Xcode / SwiftPM local state — .swiftpm and xcuserdata embed your macOS username
 *.xcodeproj
 *.xcworkspace
