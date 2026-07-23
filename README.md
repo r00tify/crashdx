@@ -1,5 +1,7 @@
 # crashdx
 
+[![CI](https://github.com/r00tify/crashdx/actions/workflows/ci.yml/badge.svg)](https://github.com/r00tify/crashdx/actions/workflows/ci.yml)
+
 A crash **diagnosis** engine for Apple platforms: parses `.ips` crash reports, symbolicates
 them against dSYMs, and produces an evidence-cited, ranked diagnosis, not just a
 symbolicated stack trace.
