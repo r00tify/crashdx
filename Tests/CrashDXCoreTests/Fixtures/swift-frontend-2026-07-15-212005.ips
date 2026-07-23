@@ -1,0 +1,507 @@
+{"app_name":"swift-frontend","timestamp":"2026-07-15 21:20:05.00 +0000","app_version":"","slice_uuid":"e75cb83d-5a6f-3c2b-8e7d-dff70e696ebd","build_version":"","platform":1,"share_with_app_devs":0,"is_first_party":1,"bug_type":"309","os_version":"macOS 26.3.1 (25D2128)","roots_installed":0,"incident_id":"8A1D05BD-5285-400D-83E5-18704875D4F4","name":"swift-frontend"}
+{
+  "uptime": 2500000,
+  "procRole": "Unspecified",
+  "version": 2,
+  "userID": 501,
+  "deployVersion": 210,
+  "modelCode": "Mac00,0",
+  "coalitionID": 689,
+  "osVersion": {
+    "train": "macOS 26.3.1",
+    "build": "25D2128",
+    "releaseType": "User"
+  },
+  "captureTime": "2026-07-15 21:20:03.3745 +0000",
+  "codeSigningMonitor": 1,
+  "incident": "8A1D05BD-5285-400D-83E5-18704875D4F4",
+  "pid": 24336,
+  "translated": false,
+  "cpuType": "ARM-64",
+  "procLaunch": "2026-07-15 21:20:02.5076 +0000",
+  "procStartAbsTime": 60800821609035,
+  "procExitAbsTime": 60800839504858,
+  "procName": "swift-frontend",
+  "procPath": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend",
+  "parentProc": "SWBBuildService",
+  "parentPid": 24314,
+  "coalitionName": "com.example.terminal",
+  "crashReporterKey": "00000000-0000-0000-0000-000000000000",
+  "developerMode": 1,
+  "responsiblePid": 630,
+  "responsibleProc": "terminal",
+  "codeSigningID": "com.apple.swift-frontend",
+  "codeSigningTeamID": "0000000000",
+  "codeSigningFlags": 570442241,
+  "codeSigningValidationCategory": 1,
+  "codeSigningTrustLevel": 4294967295,
+  "codeSigningAuxiliaryInfo": 0,
+  "instructionByteStream": {
+    "beforePC": "fyMD1f17v6n9AwCRFOD/l78DAJH9e8Go/w9f1sADX9YQKYDSARAA1A==",
+    "atPC": "AwEAVH8jA9X9e7+p/QMAkQng/5e/AwCR/XvBqP8PX9bAA1/WcAqA0g=="
+  },
+  "bootSessionUUID": "11111111-1111-1111-1111-111111111111",
+  "wakeTime": 27379,
+  "sleepWakeUUID": "22222222-2222-2222-2222-222222222222",
+  "sip": "enabled",
+  "exception": {
+    "codes": "0x0000000000000000, 0x0000000000000000",
+    "rawCodes": [
+      0,
+      0
+    ],
+    "type": "EXC_CRASH",
+    "signal": "SIGABRT"
+  },
+  "termination": {
+    "flags": 0,
+    "code": 6,
+    "namespace": "SIGNAL",
+    "indicator": "Abort trap: 6",
+    "byProc": "swift-frontend",
+    "byPid": 24336
+  },
+  "asi": {
+    "libsystem_c.dylib": [
+      "abort() called"
+    ]
+  },
+  "extMods": {
+    "caller": {
+      "thread_create": 0,
+      "thread_set_state": 0,
+      "task_for_pid": 0
+    },
+    "system": {
+      "thread_create": 0,
+      "thread_set_state": 5322,
+      "task_for_pid": 1694
+    },
+    "targeted": {
+      "thread_create": 0,
+      "thread_set_state": 0,
+      "task_for_pid": 0
+    },
+    "warnings": 0
+  },
+  "faultingThread": 0,
+  "threads": [
+    {
+      "triggered": true,
+      "id": 46261976,
+      "threadState": {
+        "x": [
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 10000000
+          },
+          {
+            "value": 33
+          },
+          {
+            "value": 18446726482597246976
+          },
+          {
+            "value": 201533852562988291
+          },
+          {
+            "value": 201533856140815363
+          },
+          {
+            "value": 1000
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 4526003880
+          },
+          {
+            "value": 38131679232
+          },
+          {
+            "value": 328
+          },
+          {
+            "value": 8298663872
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 6
+          },
+          {
+            "value": 259
+          },
+          {
+            "value": 8275849696,
+            "symbolLocation": 224,
+            "symbol": "_main_thread"
+          },
+          {
+            "value": 6126008704
+          },
+          {
+            "value": 6126008864
+          },
+          {
+            "value": 38107775424
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 38105453992
+          },
+          {
+            "value": 38116081760
+          },
+          {
+            "value": 6126015200
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6461012104
+        },
+        "cpsr": {
+          "value": 1073745920
+        },
+        "fp": {
+          "value": 6126008560
+        },
+        "sp": {
+          "value": 6126008528
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6460773808,
+          "matchesCrashFrame": 1
+        },
+        "far": {
+          "value": 0
+        }
+      },
+      "queue": "com.apple.main-thread",
+      "frames": [
+        {
+          "imageOffset": 38320,
+          "symbol": "__pthread_kill",
+          "symbolLocation": 8,
+          "imageIndex": 14
+        },
+        {
+          "imageOffset": 26760,
+          "symbol": "pthread_kill",
+          "symbolLocation": 296,
+          "imageIndex": 15
+        },
+        {
+          "imageOffset": 497888,
+          "symbol": "__abort",
+          "symbolLocation": 132,
+          "imageIndex": 16
+        },
+        {
+          "imageOffset": 497756,
+          "symbol": "abort",
+          "symbolLocation": 136,
+          "imageIndex": 16
+        },
+        {
+          "imageOffset": 7966112,
+          "symbol": "swift::DiagnosticHelper::Implementation::diagnoseFatalError(char const*, bool)",
+          "symbolLocation": 668,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 108645188,
+          "symbol": "llvm::report_fatal_error(llvm::Twine const&, bool)",
+          "symbolLocation": 292,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 108644896,
+          "symbol": "llvm::report_fatal_error(char const*, bool)",
+          "symbolLocation": 48,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 10420224,
+          "symbol": "llvm::detail::PassModel<llvm::Module, llvm::VerifierPass, llvm::AnalysisManager<llvm::Module>>::run(llvm::Module&, llvm::AnalysisManager<llvm::Module>&)",
+          "symbolLocation": 172,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 106574756,
+          "symbol": "llvm::PassManager<llvm::Module, llvm::AnalysisManager<llvm::Module>>::run(llvm::Module&, llvm::AnalysisManager<llvm::Module>&)",
+          "symbolLocation": 712,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 10366504,
+          "symbol": "swift::performLLVMOptimizations(swift::IRGenOptions const&, swift::DiagnosticEngine&, llvm::sys::SmartMutex<false>*, llvm::Module*, llvm::TargetMachine*, llvm::raw_pwrite_stream*)",
+          "symbolLocation": 6128,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 10374108,
+          "symbol": "swift::performLLVM(swift::IRGenOptions const&, swift::DiagnosticEngine&, llvm::sys::SmartMutex<false>*, llvm::GlobalVariable*, llvm::Module*, llvm::TargetMachine*, llvm::StringRef, llvm::vfs::OutputBackend&, swift::UnifiedStatsReporter*)",
+          "symbolLocation": 3020,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 3811596,
+          "symbol": "generateCode(swift::CompilerInstance&, llvm::StringRef, llvm::Module*, llvm::GlobalVariable*)",
+          "symbolLocation": 440,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 3783252,
+          "symbol": "performCompileStepsPostSILGen(swift::CompilerInstance&, std::__1::unique_ptr<swift::SILModule, std::__1::default_delete<swift::SILModule>>, llvm::PointerUnion<swift::ModuleDecl*, swift::SourceFile*>, swift::PrimarySpecificPaths const&, int&, swift::FrontendObserver*, llvm::ArrayRef<char const*>)",
+          "symbolLocation": 2508,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 3776792,
+          "symbol": "swift::performCompileStepsPostSema(swift::CompilerInstance&, int&, swift::FrontendObserver*, llvm::ArrayRef<char const*>)",
+          "symbolLocation": 1052,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 3799728,
+          "symbol": "performCompile(swift::CompilerInstance&, int&, swift::FrontendObserver*, llvm::ArrayRef<char const*>)",
+          "symbolLocation": 1740,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 3786776,
+          "symbol": "swift::performFrontend(llvm::ArrayRef<char const*>, char const*, void*, swift::FrontendObserver*)",
+          "symbolLocation": 3308,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 3261476,
+          "symbol": "swift::mainEntry(int, char const**)",
+          "symbolLocation": 5224,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 36180,
+          "symbol": "start",
+          "symbolLocation": 7184,
+          "imageIndex": 17
+        }
+      ]
+    }
+  ],
+  "usedImages": [
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4340809728,
+      "size": 132120576,
+      "uuid": "e75cb83d-5a6f-3c2b-8e7d-dff70e696ebd",
+      "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend",
+      "name": "swift-frontend"
+    },
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4513185792,
+      "size": 65536,
+      "uuid": "5fd54591-3637-3b98-988a-e70eaf93f7a4",
+      "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/compiler/lib_CompilerSwiftIDEUtils.dylib",
+      "name": "lib_CompilerSwiftIDEUtils.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4514938880,
+      "size": 147456,
+      "uuid": "a58bc92d-35f7-3bb1-9927-d091dbc9c0c9",
+      "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/compiler/lib_CompilerSwiftLexicalLookup.dylib",
+      "name": "lib_CompilerSwiftLexicalLookup.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4517085184,
+      "size": 262144,
+      "uuid": "09b28c9a-c470-35ab-ae94-1a14edd6624d",
+      "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/compiler/lib_CompilerSwiftCompilerPluginMessageHandling.dylib",
+      "name": "lib_CompilerSwiftCompilerPluginMessageHandling.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4514119680,
+      "size": 147456,
+      "uuid": "44ef1db9-f1fe-303f-9058-cc2479d307f0",
+      "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/compiler/lib_CompilerSwiftSyntaxMacroExpansion.dylib",
+      "name": "lib_CompilerSwiftSyntaxMacroExpansion.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4515692544,
+      "size": 49152,
+      "uuid": "7a58a926-a90e-3bc5-bd8f-311a8bec403a",
+      "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/compiler/lib_CompilerSwiftSyntaxMacros.dylib",
+      "name": "lib_CompilerSwiftSyntaxMacros.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4515872768,
+      "size": 147456,
+      "uuid": "bc8beb8b-4445-3397-862a-0d04957dc82d",
+      "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/compiler/lib_CompilerSwiftIfConfig.dylib",
+      "name": "lib_CompilerSwiftIfConfig.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4519133184,
+      "size": 98304,
+      "uuid": "4b849e75-0f17-34c2-97ef-bd9cf6c89d3d",
+      "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/compiler/lib_CompilerSwiftOperators.dylib",
+      "name": "lib_CompilerSwiftOperators.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4522049536,
+      "size": 212992,
+      "uuid": "3ba2970d-5ac9-3065-99dd-f124705792b2",
+      "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/compiler/lib_CompilerSwiftSyntaxBuilder.dylib",
+      "name": "lib_CompilerSwiftSyntaxBuilder.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4519706624,
+      "size": 344064,
+      "uuid": "98dd3dc1-f067-3595-9a0e-a7381e2ea240",
+      "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/compiler/lib_CompilerSwiftParserDiagnostics.dylib",
+      "name": "lib_CompilerSwiftParserDiagnostics.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4521164800,
+      "size": 65536,
+      "uuid": "c03c1a7e-3cf6-306b-826b-55738afc1fd9",
+      "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/compiler/lib_CompilerSwiftBasicFormat.dylib",
+      "name": "lib_CompilerSwiftBasicFormat.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4528373760,
+      "size": 1064960,
+      "uuid": "761758ed-9baf-3cab-8960-8576ddfbb312",
+      "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/compiler/lib_CompilerSwiftParser.dylib",
+      "name": "lib_CompilerSwiftParser.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4515348480,
+      "size": 81920,
+      "uuid": "77a2b07f-be8d-3bba-9da4-699c7c15eaa2",
+      "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/compiler/lib_CompilerSwiftDiagnostics.dylib",
+      "name": "lib_CompilerSwiftDiagnostics.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4555751424,
+      "size": 3080192,
+      "uuid": "5ed81aed-e95e-393f-bc92-18d6a9484f2e",
+      "path": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/compiler/lib_CompilerSwiftSyntax.dylib",
+      "name": "lib_CompilerSwiftSyntax.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6460735488,
+      "size": 246944,
+      "uuid": "78ec33a6-6330-3836-8900-eb90836936e8",
+      "path": "/usr/lib/system/libsystem_kernel.dylib",
+      "name": "libsystem_kernel.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6460985344,
+      "size": 51916,
+      "uuid": "0596a7b6-bce2-3f06-a2e8-3eaab5371ed8",
+      "path": "/usr/lib/system/libsystem_pthread.dylib",
+      "name": "libsystem_pthread.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6459486208,
+      "size": 532552,
+      "uuid": "eb569350-0696-3397-838e-0344948107c0",
+      "path": "/usr/lib/system/libsystem_c.dylib",
+      "name": "libsystem_c.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6457004032,
+      "size": 653076,
+      "uuid": "044cd67e-3a0a-3ca4-8bb3-a9687d5328fe",
+      "path": "/usr/lib/dyld",
+      "name": "dyld"
+    },
+    {
+      "size": 0,
+      "source": "A",
+      "base": 0,
+      "uuid": "00000000-0000-0000-0000-000000000000"
+    }
+  ],
+  "sharedCache": {
+    "base": 6455918592,
+    "size": 5820792832,
+    "uuid": "674db25a-34b2-3c56-8bd4-7d78005b2f2e"
+  },
+  "vmSummary": "ReadOnly portion of Libraries: Total=778.9M resident=0K(0%) swapped_out_or_unallocated=778.9M(100%)\nWritable regions: Total=170.7M written=418K(0%) resident=418K(0%) swapped_out=0K(0%) unallocated=170.3M(100%)\n\n                                VIRTUAL   REGION \nREGION TYPE                        SIZE    COUNT (non-coalesced) \n===========                     =======  ======= \nKernel Alloc Once                   32K        1 \nMALLOC                           160.8M       31 \nMALLOC guard page                 3200K        4 \nSTACK GUARD                       56.0M        1 \nStack                             8176K        1 \nVM_ALLOCATE                        528K        2 \n__AUTH                             528K       15 \n__AUTH_CONST                       449K       51 \n__DATA                            2617K       59 \n__DATA_CONST                      6610K       64 \n__DATA_DIRTY                       261K       38 \n__LINKEDIT                       635.6M       15 \n__OBJC_RO                         78.4M        1 \n__OBJC_RW                         2571K        1 \n__TEXT                           143.2M       67 \n__TPRO_CONST                       128K        2 \ndyld private memory                176K        4 \npage table in kernel               418K        1 \nshared memory                       32K        1 \n===========                     =======  ======= \nTOTAL                              1.1G      359 \n",
+  "legacyInfo": {
+    "threadTriggered": {
+      "queue": "com.apple.main-thread"
+    }
+  },
+  "logWritingSignature": "0000000000000000000000000000000000000000",
+  "bug_type": "309",
+  "roots_installed": 0,
+  "trmStatus": 1
+}

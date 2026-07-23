@@ -1,0 +1,13 @@
+* text=auto eol=lf
+
+# Crash reports and golden snapshots: machine-generated, reviewed as a whole rather than
+# line-by-line. Without this, every fixture change is an unreadable multi-hundred-line diff.
+# (No slash in these patterns, so they match at any depth.)
+*.ips         -diff
+*-golden.json -diff
+
+# dSYM bundles are Mach-O payloads plus generated metadata — never line-ending-normalize
+# them, or section offsets shift and the embedded UUID stops matching the .ips that
+# references it. The leading **/ is required: a pattern containing a slash is otherwise
+# anchored to this file's directory and would never match the nested fixture bundles.
+**/*.dSYM/**  binary

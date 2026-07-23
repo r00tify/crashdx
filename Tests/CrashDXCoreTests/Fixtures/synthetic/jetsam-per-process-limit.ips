@@ -1,0 +1,327 @@
+{"app_name":"jetsamvictim","timestamp":"2026-07-22 22:00:22.00 +0000","app_version":"","slice_uuid":"657a6675-2d2c-32ca-8c31-3a8c948df5fe","build_version":"","platform":1,"share_with_app_devs":0,"is_first_party":1,"bug_type":"309","os_version":"macOS 26.3.1 (25D2128)","roots_installed":0,"incident_id":"61AE3B1B-AF2F-40A3-86A4-E7CAE20AC9DF","name":"jetsamvictim"}
+{
+  "uptime": 3000000,
+  "procRole": "Unspecified",
+  "version": 2,
+  "userID": 501,
+  "deployVersion": 210,
+  "modelCode": "Mac00,0",
+  "coalitionID": 90392,
+  "osVersion": {
+    "train": "macOS 26.3.1",
+    "build": "25D2128",
+    "releaseType": "User"
+  },
+  "captureTime": "2026-07-22 22:00:19.7548 +0000",
+  "codeSigningMonitor": 1,
+  "incident": "61AE3B1B-AF2F-40A3-86A4-E7CAE20AC9DF",
+  "pid": 80389,
+  "translated": false,
+  "cpuType": "ARM-64",
+  "procLaunch": "2026-07-22 22:00:19.1281 +0000",
+  "procStartAbsTime": 73043558361234,
+  "procExitAbsTime": 73043568719535,
+  "procName": "jetsamvictim",
+  "procPath": "/private/tmp/*/crashspike",
+  "parentProc": "zsh",
+  "parentPid": 80381,
+  "coalitionName": "com.example.terminal",
+  "crashReporterKey": "00000000-0000-0000-0000-000000000000",
+  "developerMode": 1,
+  "responsiblePid": 10021,
+  "responsibleProc": "terminal",
+  "codeSigningID": "crashspike",
+  "codeSigningTeamID": "0000000000",
+  "codeSigningFlags": 570556929,
+  "codeSigningValidationCategory": 10,
+  "codeSigningTrustLevel": 4294967295,
+  "codeSigningAuxiliaryInfo": 0,
+  "instructionByteStream": {
+    "beforePC": "qQ0AtYn9YNNpCAC14gMDquMDBKrkAwaq5QMHquYDDKrnAwiqszz/lw==",
+    "atPC": "IAAg1Gj8YNMoBwC1aPxQ0x9BAPFIBABUaFB1kgkAm1IfAQnrwAMAVA=="
+  },
+  "bootSessionUUID": "11111111-1111-1111-1111-111111111111",
+  "wakeTime": 124225,
+  "sleepWakeUUID": "22222222-2222-2222-2222-222222222222",
+  "sip": "enabled",
+  "exception": {
+    "codes": "0x0000000000000001, 0x0000000000000000",
+    "rawCodes": [
+      1,
+      0
+    ],
+    "type": "EXC_RESOURCE",
+    "signal": "SIGKILL",
+    "subtype": "RESOURCE_TYPE_MEMORY"
+  },
+  "termination": {
+    "flags": 0,
+    "code": 0,
+    "namespace": "JETSAM",
+    "indicator": "per-process-limit",
+    "byProc": "jetsamvictim",
+    "byPid": 90,
+    "reasons": [
+      "per-process-limit 350808KB exceeds task limit 335872KB"
+    ]
+  },
+  "os_fault": {
+    "process": "crashspike"
+  },
+  "extMods": {
+    "caller": {
+      "thread_create": 0,
+      "thread_set_state": 0,
+      "task_for_pid": 0
+    },
+    "system": {
+      "thread_create": 0,
+      "thread_set_state": 6482,
+      "task_for_pid": 2028
+    },
+    "targeted": {
+      "thread_create": 0,
+      "thread_set_state": 0,
+      "task_for_pid": 0
+    },
+    "warnings": 0
+  },
+  "faultingThread": 0,
+  "threads": [
+    {
+      "triggered": true,
+      "id": 54080405,
+      "threadState": {
+        "x": [
+          {
+            "value": 4308487296
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 18446744073709551568
+          },
+          {
+            "value": 4308487312
+          },
+          {
+            "value": 4308487424
+          },
+          {
+            "value": 6164981920
+          },
+          {
+            "value": 101
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 259
+          },
+          {
+            "value": 259
+          },
+          {
+            "value": 4242
+          },
+          {
+            "value": 4498
+          },
+          {
+            "value": 35
+          },
+          {
+            "value": 3277
+          },
+          {
+            "value": 102
+          },
+          {
+            "value": 144115188344291384
+          },
+          {
+            "value": 6461050960,
+            "symbolLocation": 0,
+            "symbol": "__bzero"
+          },
+          {
+            "value": 8298672416
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 6164982064
+          },
+          {
+            "value": 8275841736,
+            "symbolLocation": 0,
+            "symbol": "lsl::sMemoryManagerBuffer"
+          },
+          {
+            "value": 8273038784,
+            "symbolLocation": 3360,
+            "symbol": "lsl::sPoolBytes"
+          },
+          {
+            "value": 18446744073709551600
+          },
+          {
+            "value": 8275855840,
+            "symbolLocation": 0,
+            "symbol": "vm_page_mask"
+          },
+          {
+            "value": 1
+          },
+          {
+            "value": 6164983104
+          },
+          {
+            "value": 8275855856,
+            "symbolLocation": 0,
+            "symbol": "mach_task_self_"
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6785477920
+        },
+        "cpsr": {
+          "value": 1610616832
+        },
+        "fp": {
+          "value": 6164982192
+        },
+        "sp": {
+          "value": 6164982064
+        },
+        "esr": {
+          "value": 4060086273,
+          "description": "(Breakpoint) brk 1"
+        },
+        "pc": {
+          "value": 6785477920,
+          "matchesCrashFrame": 1
+        },
+        "far": {
+          "value": 0
+        }
+      },
+      "queue": "com.apple.main-thread",
+      "frames": [
+        {
+          "imageOffset": 1277216,
+          "symbol": "_assertionFailure(_:_:file:line:flags:)",
+          "symbolLocation": 364,
+          "imageIndex": 1
+        },
+        {
+          "imageOffset": 3148,
+          "sourceLine": 10,
+          "sourceFile": "main.swift",
+          "symbol": "applyDiscount(_:)",
+          "imageIndex": 0,
+          "symbolLocation": 180
+        },
+        {
+          "imageOffset": 3224,
+          "sourceLine": 14,
+          "sourceFile": "main.swift",
+          "symbol": "processOrder(_:)",
+          "imageIndex": 0,
+          "symbolLocation": 40
+        },
+        {
+          "imageOffset": 2524,
+          "sourceLine": 19,
+          "sourceFile": "main.swift",
+          "symbol": "run()",
+          "imageIndex": 0,
+          "symbolLocation": 76
+        },
+        {
+          "imageOffset": 2436,
+          "sourceLine": 23,
+          "sourceFile": "main.swift",
+          "symbol": "main",
+          "imageIndex": 0,
+          "symbolLocation": 12
+        },
+        {
+          "imageOffset": 36180,
+          "symbol": "start",
+          "symbolLocation": 7184,
+          "imageIndex": 2
+        }
+      ]
+    }
+  ],
+  "usedImages": [
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4301897728,
+      "size": 16384,
+      "uuid": "657a6675-2d2c-32ca-8c31-3a8c948df5fe",
+      "path": "*/crashspike",
+      "name": "crashspike"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6784200704,
+      "size": 5826272,
+      "uuid": "ef17eaac-5e38-3d8f-9849-a68224788fa6",
+      "path": "/usr/lib/swift/libswiftCore.dylib",
+      "name": "libswiftCore.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6457004032,
+      "size": 653076,
+      "uuid": "044cd67e-3a0a-3ca4-8bb3-a9687d5328fe",
+      "path": "/usr/lib/dyld",
+      "name": "dyld"
+    },
+    {
+      "size": 0,
+      "source": "A",
+      "base": 0,
+      "uuid": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6461038592,
+      "size": 33968,
+      "uuid": "62c9cd37-272d-3d2d-9a1c-6f4ef24f7ec7",
+      "path": "/usr/lib/system/libsystem_platform.dylib",
+      "name": "libsystem_platform.dylib"
+    }
+  ],
+  "sharedCache": {
+    "base": 6455918592,
+    "size": 5820792832,
+    "uuid": "674db25a-34b2-3c56-8bd4-7d78005b2f2e"
+  },
+  "vmSummary": "ReadOnly portion of Libraries: Total=869.5M resident=0K(0%) swapped_out_or_unallocated=869.5M(100%)\nWritable regions: Total=89.3M written=241K(0%) resident=241K(0%) swapped_out=0K(0%) unallocated=89.1M(100%)\n\n                                VIRTUAL   REGION \nREGION TYPE                        SIZE    COUNT (non-coalesced) \n===========                     =======  ======= \nActivity Tracing                   256K        1 \nKernel Alloc Once                   32K        1 \nMALLOC                            80.8M       11 \nMALLOC guard page                 3824K        4 \nSTACK GUARD                       56.0M        1 \nStack                             8176K        1 \n__AUTH                            1310K      147 \n__AUTH_CONST                      17.1M      338 \n__CTF                               824        1 \n__DATA                            4104K      294 \n__DATA_CONST                      15.1M      338 \n__DATA_DIRTY                      1301K      282 \n__FONT_DATA                        2352        1 \n__LINKEDIT                       587.4M        2 \n__OBJC_RO                         78.4M        1 \n__OBJC_RW                         2571K        1 \n__TEXT                           282.2M      347 \n__TPRO_CONST                       128K        2 \npage table in kernel               241K        1 \nshared memory                       48K        2 \n===========                     =======  ======= \nTOTAL                              1.1G     1776 \n",
+  "legacyInfo": {
+    "threadTriggered": {
+      "queue": "com.apple.main-thread"
+    }
+  },
+  "logWritingSignature": "0000000000000000000000000000000000000000",
+  "roots_installed": 0,
+  "bug_type": "309",
+  "trmStatus": 1
+}

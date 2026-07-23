@@ -1,0 +1,25 @@
+# Build artifacts
+.build/
+DerivedData/
+.DS_Store
+
+# Xcode / SwiftPM local state — .swiftpm and xcuserdata embed your macOS username
+*.xcodeproj
+*.xcworkspace
+.swiftpm/
+xcuserdata/
+
+# Python bytecode — the Scripts/ helpers import the shared ips_scrub module
+__pycache__/
+*.pyc
+
+# Claude Code local state (skills under .claude/skills/ stay tracked)
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+
+# PRIVACY: machine-collected crash reports contain crashReporterKey, boot/sleep-wake
+# UUIDs, device model codes, and usernames in paths. Never commit.
+# NOTE: the tracked fixtures under corpus/fixtures/ and Tests/**/Fixtures/ are synthetic
+# in CRASH SCENARIO only — they were harvested from a real machine, so any new fixture
+# must be scrubbed before it is committed.
+corpus/raw/
