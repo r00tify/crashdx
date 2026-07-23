@@ -1,0 +1,10 @@
+# Code owners for crashdx.
+#
+# Branch protection on `main` requires an approving review from a code owner, so
+# every path needs an owner here — a path that matches no rule has no code owner
+# and its review requirement silently does not apply.
+#
+# Note that GitHub does not let anyone approve their own pull request, so a PR
+# opened by the sole code owner can only land via an admin bypass.
+
+* @r00tify
