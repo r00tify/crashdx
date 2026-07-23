@@ -1,0 +1,32 @@
+{
+  "manifest_version": "0.3",
+  "name": "crashdx",
+  "display_name": "crashdx",
+  "version": "0.1.0",
+  "description": "Diagnoses Apple crash reports (.ips): symbolicates against dSYMs and produces an evidence-cited, ranked diagnosis instead of just a stack trace.",
+  "long_description": "crashdx parses .ips crash reports, symbolicates them against dSYMs, and runs a deterministic, rule-based diagnosis engine on top: typed facts extracted from the report feed a set of hypothesis rules, ranked by supporting and contradicting evidence. Every claim traces back to a JSON pointer in the original report, and the engine reports 'inconclusive' rather than force a confident wrong answer. No LLM calls anywhere in the engine itself; runs entirely locally with no network access.",
+  "author": {
+    "name": "r00tify",
+    "url": "https://github.com/r00tify"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/r00tify/crashdx.git"
+  },
+  "homepage": "https://github.com/r00tify/crashdx",
+  "documentation": "https://github.com/r00tify/crashdx/blob/main/README.md",
+  "support": "https://github.com/r00tify/crashdx/issues",
+  "license": "MIT",
+  "keywords": ["crash", "crash-reporting", "ips", "symbolication", "debugging", "apple", "ios", "macos"],
+  "server": {
+    "type": "binary",
+    "entry_point": "server/crashdx-mcp",
+    "mcp_config": {
+      "command": "${__dirname}/server/crashdx-mcp",
+      "args": []
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin"]
+  }
+}

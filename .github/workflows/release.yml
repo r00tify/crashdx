@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  mcpb-bundle:
+    name: Build and attach MCPB bundle
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Show toolchain
+        run: |
+          swift --version
+          xcode-select -p
+
+      # Universal binary so the bundle runs on both Apple silicon and Intel Macs.
+      - name: Build crashdx-mcp (release, universal)
+        run: swift build -c release --product crashdx-mcp --arch arm64 --arch x86_64
+
+      - name: Assemble bundle
+        run: |
+          mkdir -p mcpb/server
+          cp .build/apple/Products/Release/crashdx-mcp mcpb/server/crashdx-mcp
+
+      - name: Install mcpb CLI
+        run: npm install -g @anthropic-ai/mcpb
+
+      - name: Pack bundle
+        working-directory: mcpb
+        run: mcpb pack . "crashdx-mcp-${{ github.ref_name }}.mcpb"
+
+      - name: Upload bundle to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ github.ref_name }}" \
+            "mcpb/crashdx-mcp-${{ github.ref_name }}.mcpb" \
+            --repo "${{ github.repository }}" \
+            --clobber

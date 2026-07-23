@@ -1,0 +1,20 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.r00tify/crashdx",
+  "description": "Diagnoses Apple crash reports (.ips): symbolicates against dSYMs and produces an evidence-cited, ranked diagnosis instead of just a stack trace.",
+  "repository": {
+    "url": "https://github.com/r00tify/crashdx",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/r00tify/crashdx/releases/download/v0.1.0/crashdx-mcp-v0.1.0.mcpb",
+      "fileSha256": "db32828aff4f1cea1e3de7fdb1c54aea46b4cdb7d1598bc6ddb407d121e156b0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
