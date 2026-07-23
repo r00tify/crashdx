@@ -67,7 +67,7 @@ and usernames in paths), so if you attach one to a bug report, scrub it first.
 ## Install / build
 
 ```sh
-git clone https://github.com/<owner>/crashdx.git
+git clone https://github.com/r00tify/crashdx.git
 cd crashdx
 swift build -c release
 ```
@@ -149,7 +149,7 @@ how to read the diagnosis and the interpretation pitfalls specific to each crash
 
 ### As a library
 
-Add `https://github.com/<owner>/crashdx.git` to your `Package.swift`, depend on the
+Add `https://github.com/r00tify/crashdx.git` to your `Package.swift`, depend on the
 `CrashDXCore` product, and call
 `AnalyzePipeline.analyze(path:tier:dsymPaths:useSpotlight:searchArchives:)`, the same
 entry point both binaries use.
