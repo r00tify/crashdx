@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# A force-push shouldn't leave the previous run burning a macOS runner.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Build and test
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      # Runs first and needs no toolchain: if a fixture leaks device identifiers, that
+      # must fail the run even when the build is broken.
+      - name: Fixtures are scrubbed
+        run: ./Scripts/check-fixtures-scrubbed.sh
+
+      - name: Show toolchain
+        run: |
+          swift --version
+          xcode-select -p
+
+      - name: Build
+        run: swift build --build-tests
+
+      # Dependencies declare swift-tools-version up to 6.2. An older toolchain silently
+      # resolves different versions than the committed lockfile, so assert it didn't move.
+      - name: Package.resolved is unchanged
+        run: git diff --exit-code Package.resolved
+
+      - name: Test
+        run: swift test
+
+      - name: MCP stdio smoke test
+        run: python3 Tests/mcp-smoke.py .build/debug/crashdx-mcp

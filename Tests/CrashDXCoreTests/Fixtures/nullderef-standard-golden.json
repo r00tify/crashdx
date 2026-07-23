@@ -1,0 +1,209 @@
+{
+  "diagnosis" : {
+    "factsConsidered" : [
+      {
+        "id" : "exception.type",
+        "sourcePath" : "exception.type",
+        "statement" : "Exception type: EXC_BAD_ACCESS"
+      },
+      {
+        "id" : "exception.signal",
+        "sourcePath" : "exception.signal",
+        "statement" : "Signal: SIGSEGV"
+      },
+      {
+        "id" : "exception.subtype",
+        "sourcePath" : "exception.subtype",
+        "statement" : "Exception subtype: KERN_INVALID_ADDRESS at 0x0000000000000000"
+      },
+      {
+        "id" : "exception.codes",
+        "sourcePath" : "exception.codes",
+        "statement" : "Exception codes: 0x0000000000000001, 0x0000000000000000"
+      },
+      {
+        "id" : "termination.namespace",
+        "sourcePath" : "termination.namespace",
+        "statement" : "Termination namespace: SIGNAL"
+      },
+      {
+        "id" : "termination.code",
+        "sourcePath" : "termination.code",
+        "statement" : "Termination code: 11 (0x0000000b)"
+      },
+      {
+        "id" : "termination.indicator",
+        "sourcePath" : "termination.indicator",
+        "statement" : "Termination indicator: Segmentation fault: 11"
+      },
+      {
+        "id" : "frames.deepest-app-frame",
+        "sourcePath" : "threads[0].frames[0]",
+        "statement" : "Deepest app-image frame on faulting thread: <unsymbolicated> (frame 0)"
+      },
+      {
+        "id" : "memory.fault-address",
+        "sourcePath" : "exception.subtype",
+        "statement" : "Faulting address: 0x0"
+      },
+      {
+        "id" : "memory.fault-address-null-page",
+        "sourcePath" : "exception.subtype",
+        "statement" : "Faulting address 0x0 is within the null page (< 0x4000, arm64 page size)"
+      },
+      {
+        "id" : "memory.fault-address-exactly-null",
+        "sourcePath" : "exception.subtype",
+        "statement" : "Faulting address is exactly 0 (a true nil-pointer dereference, not an offset field access)"
+      },
+      {
+        "id" : "registers.far",
+        "sourcePath" : "threads[0].threadState.far",
+        "statement" : "far (fault address register): 0x0"
+      },
+      {
+        "id" : "registers.pc",
+        "sourcePath" : "threads[0].threadState.pc",
+        "statement" : "pc (program counter): 0x100d8c99c"
+      },
+      {
+        "id" : "registers.lr",
+        "sourcePath" : "threads[0].threadState.lr",
+        "statement" : "lr (link register): 0x100d8c890"
+      }
+    ],
+    "hypotheses" : [
+      {
+        "band" : "strong",
+        "hypothesis" : {
+          "category" : "memory",
+          "confirmFurtherBy" : [
+            "Add a nil-check\/guard at the deepest app frame before the dereference",
+            "Enable Address Sanitizer or run with NSZombies to catch the nil access closer to its origin"
+          ],
+          "contradicting" : [
+
+          ],
+          "explanation" : "The faulting address is exactly 0 — a true nil-pointer dereference: code called through a pointer\/reference that was nil (an un-force-unwrapped Optional bridged to a raw pointer, an uninitialized `weak`\/`unowned` reference, or a C pointer that was never checked). This is the clearest, least ambiguous EXC_BAD_ACCESS cause.",
+          "id" : "null-dereference",
+          "inspect" : [
+            {
+              "frameIndex" : 0,
+              "leb" : false,
+              "threadIndex" : 0
+            }
+          ],
+          "supporting" : [
+            {
+              "factID" : "memory.fault-address-null-page",
+              "weight" : 3
+            },
+            {
+              "factID" : "memory.fault-address-exactly-null",
+              "weight" : 1
+            },
+            {
+              "factID" : "registers.far",
+              "weight" : 1
+            }
+          ],
+          "title" : "Null-pointer dereference"
+        },
+        "score" : 5
+      }
+    ],
+    "status" : "verdict",
+    "verdict" : {
+      "category" : "memory",
+      "confirmFurtherBy" : [
+        "Add a nil-check\/guard at the deepest app frame before the dereference",
+        "Enable Address Sanitizer or run with NSZombies to catch the nil access closer to its origin"
+      ],
+      "contradicting" : [
+
+      ],
+      "explanation" : "The faulting address is exactly 0 — a true nil-pointer dereference: code called through a pointer\/reference that was nil (an un-force-unwrapped Optional bridged to a raw pointer, an uninitialized `weak`\/`unowned` reference, or a C pointer that was never checked). This is the clearest, least ambiguous EXC_BAD_ACCESS cause.",
+      "id" : "null-dereference",
+      "inspect" : [
+        {
+          "frameIndex" : 0,
+          "leb" : false,
+          "threadIndex" : 0
+        }
+      ],
+      "supporting" : [
+        {
+          "factID" : "memory.fault-address-null-page",
+          "weight" : 3
+        },
+        {
+          "factID" : "memory.fault-address-exactly-null",
+          "weight" : 1
+        },
+        {
+          "factID" : "registers.far",
+          "weight" : 1
+        }
+      ],
+      "title" : "Null-pointer dereference"
+    }
+  },
+  "event" : {
+    "bugType" : "309",
+    "exceptionType" : "EXC_BAD_ACCESS",
+    "signal" : "SIGSEGV",
+    "terminationIndicator" : "Segmentation fault: 11",
+    "terminationNamespace" : "SIGNAL"
+  },
+  "faultingThread" : {
+    "frames" : [
+      {
+        "imageName" : "nullderef",
+        "imageOffset" : 2460
+      },
+      {
+        "imageName" : "nullderef",
+        "imageOffset" : 2192
+      },
+      {
+        "imageName" : "nullderef",
+        "imageOffset" : 2036,
+        "symbol" : "main"
+      },
+      {
+        "imageName" : "dyld",
+        "imageOffset" : 36180,
+        "symbol" : "start"
+      }
+    ],
+    "index" : 0,
+    "queue" : "com.apple.main-thread",
+    "triggered" : true
+  },
+  "images" : [
+    {
+      "arch" : "arm64",
+      "name" : "nullderef",
+      "path" : "*\/nullderef",
+      "status" : "symbolicated",
+      "uuid" : "16f8ae74-c36b-39af-b0d8-da69b83ec96b"
+    },
+    {
+      "arch" : "arm64e",
+      "name" : "dyld",
+      "path" : "\/usr\/lib\/dyld",
+      "status" : "symbolicated",
+      "uuid" : "044cd67e-3a0a-3ca4-8bb3-a9687d5328fe"
+    }
+  ],
+  "otherThreads" : [
+
+  ],
+  "process" : {
+    "captureTime" : "2026-07-23 01:29:01.9680 +0000",
+    "name" : "nullderef",
+    "osVersion" : "macOS 26.3.1 (25D2128)"
+  },
+  "schemaVersion" : "0.2",
+  "tier" : "standard"
+}

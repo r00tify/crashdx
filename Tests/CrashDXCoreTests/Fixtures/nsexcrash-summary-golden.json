@@ -1,0 +1,274 @@
+{
+  "asiMessages" : [
+    "abort() called"
+  ],
+  "diagnosis" : {
+    "hypotheses" : [
+      {
+        "band" : "strong",
+        "hypothesis" : {
+          "category" : "objc-exception",
+          "confirmFurtherBy" : [
+            "Symbolicate the app frames in lastExceptionBacktrace to find the throw site",
+            "Check the asi\/console log for the exception name and reason, if available"
+          ],
+          "contradicting" : [
+
+          ],
+          "explanation" : "A lastExceptionBacktrace is present and an objc_exception_throw frame appears in it (or on the faulting thread) — together these are pathognomonic for an uncaught NSException: `-raise` walked up through objc_exception_throw and was never caught, so the runtime called terminate and aborted. The asi \"Terminating app due to uncaught exception\" message is only corroboration when present; plain CLI\/Foundation processes never write it, so its absence is not evidence against this hypothesis.",
+          "id" : "uncaught-objc-exception",
+          "inspect" : [
+            {
+              "frameIndex" : 3,
+              "leb" : true
+            }
+          ],
+          "supporting" : [
+            {
+              "factID" : "leb.present",
+              "weight" : 1
+            },
+            {
+              "factID" : "leb.sentinel.objc-exception-throw",
+              "weight" : 3
+            },
+            {
+              "factID" : "frames.sentinel.objc-exception-throw",
+              "weight" : 1
+            }
+          ],
+          "title" : "Uncaught Objective-C exception (NSException)"
+        },
+        "score" : 5
+      },
+      {
+        "band" : "moderate",
+        "hypothesis" : {
+          "category" : "cxx-exception",
+          "confirmFurtherBy" : [
+            "Find the throw site (search for `throw` near the deepest app frame)",
+            "Wrap the call in try\/catch, or install std::set_terminate for a diagnostic breadcrumb"
+          ],
+          "contradicting" : [
+            {
+              "factID" : "frames.sentinel.objc-exception-throw",
+              "weight" : 2
+            }
+          ],
+          "explanation" : "The faulting thread shows a __cxa_throw\/std::__terminate chain: a C++ exception was thrown and never caught, so the C++ runtime called std::terminate, which aborted the process. This is the raw C++ exception path — distinct from an Objective-C NSException, which also rides the C++ ABI internally but is reported by uncaught-objc-exception when that rule's more specific markers (an objc_exception_throw frame with a lastExceptionBacktrace) are present.",
+          "id" : "cxx-terminate",
+          "inspect" : [
+            {
+              "frameIndex" : 11,
+              "leb" : false,
+              "threadIndex" : 0
+            }
+          ],
+          "supporting" : [
+            {
+              "factID" : "frames.sentinel.cxa-throw",
+              "weight" : 2
+            },
+            {
+              "factID" : "frames.sentinel.terminate-handler",
+              "weight" : 2
+            }
+          ],
+          "title" : "Uncaught C++ exception (std::terminate)"
+        },
+        "score" : 2
+      },
+      {
+        "band" : "weak",
+        "hypothesis" : {
+          "category" : "abort",
+          "confirmFurtherBy" : [
+            "Inspect frames directly above the abort()\/pthread_kill chain for the real trigger",
+            "Check asi\/console log around the crash time for an explicit abort message"
+          ],
+          "contradicting" : [
+
+          ],
+          "explanation" : "The process received SIGABRT via an abort()\/pthread_kill chain. This is the generic, honest fallback: no more specific pattern (watchdog, jetsam, code-signing, C++ terminate, or an uncaught NSException) was identified from the available evidence. Something in this process explicitly called abort(), or a library detected a fatal condition and called it on its behalf — inspect the frames immediately above the abort chain for the actual trigger.",
+          "id" : "abort-generic",
+          "inspect" : [
+            {
+              "frameIndex" : 11,
+              "leb" : false,
+              "threadIndex" : 0
+            }
+          ],
+          "supporting" : [
+            {
+              "factID" : "frames.sentinel.abort-chain",
+              "weight" : 1
+            }
+          ],
+          "title" : "Process aborted (SIGABRT)"
+        },
+        "score" : 1
+      }
+    ],
+    "status" : "verdict",
+    "verdict" : {
+      "category" : "objc-exception",
+      "confirmFurtherBy" : [
+        "Symbolicate the app frames in lastExceptionBacktrace to find the throw site",
+        "Check the asi\/console log for the exception name and reason, if available"
+      ],
+      "contradicting" : [
+
+      ],
+      "explanation" : "A lastExceptionBacktrace is present and an objc_exception_throw frame appears in it (or on the faulting thread) — together these are pathognomonic for an uncaught NSException: `-raise` walked up through objc_exception_throw and was never caught, so the runtime called terminate and aborted. The asi \"Terminating app due to uncaught exception\" message is only corroboration when present; plain CLI\/Foundation processes never write it, so its absence is not evidence against this hypothesis.",
+      "id" : "uncaught-objc-exception",
+      "inspect" : [
+        {
+          "frameIndex" : 3,
+          "leb" : true
+        }
+      ],
+      "supporting" : [
+        {
+          "factID" : "leb.present",
+          "weight" : 1
+        },
+        {
+          "factID" : "leb.sentinel.objc-exception-throw",
+          "weight" : 3
+        },
+        {
+          "factID" : "frames.sentinel.objc-exception-throw",
+          "weight" : 1
+        }
+      ],
+      "title" : "Uncaught Objective-C exception (NSException)"
+    }
+  },
+  "event" : {
+    "bugType" : "309",
+    "exceptionType" : "EXC_CRASH",
+    "signal" : "SIGABRT",
+    "terminationIndicator" : "Abort trap: 6",
+    "terminationNamespace" : "SIGNAL"
+  },
+  "faultingThread" : {
+    "frames" : [
+      {
+        "imageName" : "libsystem_kernel.dylib",
+        "imageOffset" : 38320,
+        "symbol" : "__pthread_kill"
+      },
+      {
+        "imageName" : "libsystem_pthread.dylib",
+        "imageOffset" : 26760,
+        "symbol" : "pthread_kill"
+      },
+      {
+        "imageName" : "libsystem_c.dylib",
+        "imageOffset" : 497744,
+        "symbol" : "abort"
+      },
+      {
+        "imageName" : "libc++abi.dylib",
+        "imageOffset" : 75864,
+        "symbol" : "__abort_message"
+      },
+      {
+        "imageName" : "libc++abi.dylib",
+        "imageOffset" : 5332,
+        "symbol" : "demangling_terminate_handler()"
+      },
+      {
+        "imageName" : "libobjc.A.dylib",
+        "imageOffset" : 148500,
+        "symbol" : "_objc_terminate()"
+      },
+      {
+        "imageName" : "libc++abi.dylib",
+        "imageOffset" : 72748,
+        "symbol" : "std::__terminate(void (*)())"
+      },
+      {
+        "imageName" : "libc++abi.dylib",
+        "imageOffset" : 86932,
+        "symbol" : "__cxxabiv1::failed_throw(__cxxabiv1::__cxa_exception*)"
+      },
+      {
+        "imageName" : "libc++abi.dylib",
+        "imageOffset" : 86844,
+        "symbol" : "__cxa_throw"
+      },
+      {
+        "imageName" : "libobjc.A.dylib",
+        "imageOffset" : 107904,
+        "symbol" : "objc_exception_throw"
+      },
+      {
+        "imageName" : "CoreFoundation",
+        "imageOffset" : 818900,
+        "symbol" : "-[NSException raise]"
+      },
+      {
+        "imageName" : "nsexcrash",
+        "imageOffset" : 2756
+      },
+      {
+        "imageName" : "nsexcrash",
+        "imageOffset" : 2620
+      },
+      {
+        "imageName" : "nsexcrash",
+        "imageOffset" : 2596
+      },
+      {
+        "imageName" : "dyld",
+        "imageOffset" : 36180,
+        "symbol" : "start"
+      }
+    ],
+    "index" : 0,
+    "queue" : "com.apple.main-thread",
+    "triggered" : true
+  },
+  "lastExceptionBacktrace" : [
+    {
+      "imageName" : "CoreFoundation",
+      "imageOffset" : 706800,
+      "symbol" : "__exceptionPreprocess"
+    },
+    {
+      "imageName" : "libobjc.A.dylib",
+      "imageOffset" : 107544,
+      "symbol" : "objc_exception_throw"
+    },
+    {
+      "imageName" : "CoreFoundation",
+      "imageOffset" : 818900,
+      "symbol" : "_CFBundleGetValueForInfoKey"
+    },
+    {
+      "imageName" : "nsexcrash",
+      "imageOffset" : 2756
+    },
+    {
+      "imageName" : "nsexcrash",
+      "imageOffset" : 2620
+    },
+    {
+      "imageName" : "nsexcrash",
+      "imageOffset" : 2596
+    },
+    {
+      "imageName" : "dyld",
+      "imageOffset" : 36180,
+      "symbol" : "start"
+    }
+  ],
+  "process" : {
+    "captureTime" : "2026-07-23 00:22:01.2793 +0000",
+    "name" : "nsexcrash",
+    "osVersion" : "macOS 26.3.1 (25D2128)"
+  },
+  "schemaVersion" : "0.2",
+  "tier" : "summary"
+}

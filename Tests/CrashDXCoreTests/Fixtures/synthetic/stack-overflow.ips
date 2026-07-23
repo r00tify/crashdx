@@ -1,0 +1,316 @@
+{"app_name":"synthetic-stack-overflow","timestamp":"2026-07-23 01:29:03.00 +0000","app_version":"","slice_uuid":"16f8ae74-c36b-39af-b0d8-da69b83ec96b","build_version":"","platform":1,"share_with_app_devs":0,"is_first_party":1,"bug_type":"309","os_version":"macOS 26.3.1 (25D2128)","roots_installed":0,"incident_id":"BE7687A4-825F-4CF0-8114-119979BF92B2","name":"synthetic-stack-overflow"}
+{
+  "uptime": 3000000,
+  "procRole": "Unspecified",
+  "version": 2,
+  "userID": 501,
+  "deployVersion": 210,
+  "modelCode": "Mac00,0",
+  "coalitionID": 90392,
+  "osVersion": {
+    "train": "macOS 26.3.1",
+    "build": "25D2128",
+    "releaseType": "User"
+  },
+  "captureTime": "2026-07-23 01:29:01.9680 +0000",
+  "codeSigningMonitor": 1,
+  "incident": "BE7687A4-825F-4CF0-8114-119979BF92B2",
+  "pid": 87955,
+  "translated": false,
+  "cpuType": "ARM-64",
+  "procLaunch": "2026-07-23 01:29:01.0654 +0000",
+  "procStartAbsTime": 73344085192099,
+  "procExitAbsTime": 73344106744370,
+  "procName": "synthetic-stack-overflow",
+  "procPath": "/Users/USER/*/nullderef",
+  "parentProc": "Exited process",
+  "parentPid": 87953,
+  "coalitionName": "com.example.terminal",
+  "crashReporterKey": "00000000-0000-0000-0000-000000000000",
+  "developerMode": 1,
+  "responsiblePid": 10021,
+  "responsibleProc": "terminal",
+  "codeSigningID": "nullderef",
+  "codeSigningTeamID": "0000000000",
+  "codeSigningFlags": 570556929,
+  "codeSigningValidationCategory": 10,
+  "codeSigningTrustLevel": 4294967295,
+  "codeSigningAuxiliaryInfo": 0,
+  "instructionByteStream": {
+    "beforePC": "/XtKqfRPSan/wwKRwANf1v9DANH/AwD5/wcA+egHQPnpAwiq6QMA+Q==",
+    "atPC": "AAFA+f9DAJHAA1/W/4MA0f17Aan9QwCR4AcA+QAEQPlGAACU4AdA+Q=="
+  },
+  "bootSessionUUID": "11111111-1111-1111-1111-111111111111",
+  "wakeTime": 136747,
+  "sleepWakeUUID": "22222222-2222-2222-2222-222222222222",
+  "sip": "enabled",
+  "vmRegionInfo": "0x3000 is in a 16K region.  Bytes into region: 0\n      REGION TYPE                    START - END         [ VSIZE] PRT/MAX SHRMOD  REGION DETAIL\n      STACK GUARD                    0000000-0004000    [   16K] ---/--- SM=NUL  \n",
+  "exception": {
+    "codes": "0x0000000000000001, 0x0000000000003000",
+    "rawCodes": [
+      1,
+      12288
+    ],
+    "type": "EXC_BAD_ACCESS",
+    "signal": "SIGSEGV",
+    "subtype": "KERN_INVALID_ADDRESS at 0x0000000000003000"
+  },
+  "termination": {
+    "flags": 0,
+    "code": 11,
+    "namespace": "SIGNAL",
+    "indicator": "Segmentation fault: 11",
+    "byProc": "exc handler",
+    "byPid": 87955
+  },
+  "vmregioninfo": "0x3000 is in a 16K region.  Bytes into region: 0\n      REGION TYPE                    START - END         [ VSIZE] PRT/MAX SHRMOD  REGION DETAIL\n      STACK GUARD                    0000000-0004000    [   16K] ---/--- SM=NUL  \n",
+  "extMods": {
+    "caller": {
+      "thread_create": 0,
+      "thread_set_state": 0,
+      "task_for_pid": 0
+    },
+    "system": {
+      "thread_create": 0,
+      "thread_set_state": 6512,
+      "task_for_pid": 2031
+    },
+    "targeted": {
+      "thread_create": 0,
+      "thread_set_state": 0,
+      "task_for_pid": 0
+    },
+    "warnings": 0
+  },
+  "faultingThread": 0,
+  "threads": [
+    {
+      "triggered": true,
+      "id": 54207089,
+      "threadState": {
+        "x": [
+          {
+            "value": 9223372041163950800,
+            "symbolLocation": 9223372036854775816,
+            "symbol": "DYLD-STUB$$print(_:separator:terminator:)"
+          },
+          {
+            "value": 1
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 4316184544
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 8323241408,
+            "symbolLocation": 8,
+            "symbol": "type metadata for Any"
+          },
+          {
+            "value": 2322283402628326176
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 32
+          },
+          {
+            "value": 5530845871721158680
+          },
+          {
+            "value": 760
+          },
+          {
+            "value": 919159853293770776
+          },
+          {
+            "value": 342699100990347288
+          },
+          {
+            "value": 1
+          },
+          {
+            "value": 6784793696,
+            "symbolLocation": 0,
+            "symbol": "swift_bridgeObjectRelease"
+          },
+          {
+            "value": 8298659120
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 8273035360,
+            "symbolLocation": 0,
+            "symbol": "lsl::sAllocatorBuffer"
+          },
+          {
+            "value": 6157708160
+          },
+          {
+            "value": 8273038784,
+            "symbolLocation": 3360,
+            "symbol": "lsl::sPoolBytes"
+          },
+          {
+            "value": 18446744073709551600
+          },
+          {
+            "value": 8275855840,
+            "symbolLocation": 0,
+            "symbol": "vm_page_mask"
+          },
+          {
+            "value": 1
+          },
+          {
+            "value": 6157708720
+          },
+          {
+            "value": 8275855856,
+            "symbolLocation": 0,
+            "symbol": "mach_task_self_"
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 4309174416
+        },
+        "cpsr": {
+          "value": 4096
+        },
+        "fp": {
+          "value": 6157708192
+        },
+        "sp": {
+          "value": 12788
+        },
+        "esr": {
+          "value": 2449473542,
+          "description": "(Data Abort) byte read Translation fault"
+        },
+        "pc": {
+          "value": 4309174684,
+          "matchesCrashFrame": 1
+        },
+        "far": {
+          "value": 12288
+        }
+      },
+      "queue": "com.apple.main-thread",
+      "frames": [
+        {
+          "imageIndex": 0,
+          "imageOffset": 3000,
+          "symbol": "recurse(_:)",
+          "symbolLocation": 0
+        },
+        {
+          "imageIndex": 0,
+          "imageOffset": 3040,
+          "symbol": "recurse(_:)",
+          "symbolLocation": 4
+        },
+        {
+          "imageIndex": 0,
+          "imageOffset": 3080,
+          "symbol": "recurse(_:)",
+          "symbolLocation": 8
+        },
+        {
+          "imageIndex": 0,
+          "imageOffset": 3120,
+          "symbol": "recurse(_:)",
+          "symbolLocation": 12
+        },
+        {
+          "imageIndex": 0,
+          "imageOffset": 3160,
+          "symbol": "recurse(_:)",
+          "symbolLocation": 16
+        },
+        {
+          "imageOffset": 2036,
+          "symbol": "main",
+          "symbolLocation": 12,
+          "imageIndex": 0
+        },
+        {
+          "imageOffset": 36180,
+          "symbol": "start",
+          "symbolLocation": 7184,
+          "imageIndex": 1
+        }
+      ]
+    }
+  ],
+  "usedImages": [
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4309172224,
+      "size": 16384,
+      "uuid": "16f8ae74-c36b-39af-b0d8-da69b83ec96b",
+      "path": "*/nullderef",
+      "name": "nullderef"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6457004032,
+      "size": 653076,
+      "uuid": "044cd67e-3a0a-3ca4-8bb3-a9687d5328fe",
+      "path": "/usr/lib/dyld",
+      "name": "dyld"
+    },
+    {
+      "size": 0,
+      "source": "A",
+      "base": 0,
+      "uuid": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6784200704,
+      "size": 5826272,
+      "uuid": "ef17eaac-5e38-3d8f-9849-a68224788fa6",
+      "path": "/usr/lib/swift/libswiftCore.dylib",
+      "name": "libswiftCore.dylib"
+    }
+  ],
+  "sharedCache": {
+    "base": 6455918592,
+    "size": 5820792832,
+    "uuid": "674db25a-34b2-3c56-8bd4-7d78005b2f2e"
+  },
+  "vmSummary": "ReadOnly portion of Libraries: Total=869.5M resident=0K(0%) swapped_out_or_unallocated=869.5M(100%)\nWritable regions: Total=85.3M written=241K(0%) resident=241K(0%) swapped_out=0K(0%) unallocated=85.1M(100%)\n\n                                VIRTUAL   REGION \nREGION TYPE                        SIZE    COUNT (non-coalesced) \n===========                     =======  ======= \nActivity Tracing                   256K        1 \nKernel Alloc Once                   32K        1 \nMALLOC                            76.8M       10 \nMALLOC guard page                 3120K        4 \nSTACK GUARD                       56.0M        1 \nStack                             8176K        1 \n__AUTH                            1310K      147 \n__AUTH_CONST                      17.1M      338 \n__CTF                               824        1 \n__DATA                            4104K      294 \n__DATA_CONST                      15.1M      338 \n__DATA_DIRTY                      1301K      282 \n__FONT_DATA                        2352        1 \n__LINKEDIT                       587.4M        2 \n__OBJC_RO                         78.4M        1 \n__OBJC_RW                         2571K        1 \n__TEXT                           282.2M      347 \n__TPRO_CONST                       128K        2 \npage table in kernel               241K        1 \nshared memory                       48K        2 \n===========                     =======  ======= \nTOTAL                              1.1G     1775 \n",
+  "legacyInfo": {
+    "threadTriggered": {
+      "queue": "com.apple.main-thread"
+    }
+  },
+  "logWritingSignature": "0000000000000000000000000000000000000000",
+  "bug_type": "309",
+  "roots_installed": 0,
+  "trmStatus": 1
+}
