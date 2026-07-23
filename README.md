@@ -204,3 +204,5 @@ one.
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+<!-- codeowners verification -->
