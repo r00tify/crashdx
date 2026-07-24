@@ -98,12 +98,118 @@ A deliberately simple, inspectable additive model:
   2 = strong indicator, 3 = pathognomonic, e.g. 0x8badf00d for watchdog).
 - Each contradicting Fact subtracts its weight.
 - `score = Σ support − Σ contradiction`; confidence bands: ≥4 strong, 2–3 moderate,
-  ≤1 weak. Raw score is kept in the JSON so consumers can re-rank.
+  ≤1 weak. Raw score is kept in the JSON so consumers can re-rank. The sum is over
+  *distinct* fact ids (highest weight wins): `supporting` is an array with no uniqueness
+  constraint, and a rule that cited one Fact twice would otherwise inflate its own score
+  silently.
 - Verdict: highest-scoring hypothesis if it is `strong` AND leads the runner-up by ≥2
   (a lone hypothesis satisfies the margin trivially); otherwise `inconclusive` with the
   ranked list. An honest `inconclusive` with good hypotheses beats a confident wrong
   label. That trade is the whole point of the scoring model, not a fallback.
 - Ties/near-ties are presented as competing explanations, deliberately.
+
+### Known limits of the additive model
+
+Recorded because the model's simplicity hides both of these, not because either is fixed.
+
+**Correlated Facts count as independent evidence.** Nothing stops a rule citing several
+renderings of one observation. `WatchdogTimeoutRule` cites `termination.code`
+(0x8badf00d, 3), `termination.namespace` (1) and `termination.watchdog-event` (2) for a
+score of 6, but ReportCrash writes all three into one `termination` dict from one launchd
+decision. One signal, scored as three. Some rules already compensate by hand
+(`UncaughtObjCExceptionRule` downgrades the faulting-thread `objc_exception_throw` to
+weight 1 when the LEB one already fired at 3); the engine does not enforce it.
+
+`EvidenceChannel` + `DiagnosisEngine.Scoring.channelCapped` are the measured, opt-in
+alternative: Facts pool by source artifact (derived from `Fact.sourcePath`) and only the
+highest weight in each pool counts, on both the supporting and contradicting side. Across
+the fixture corpus that demotes 3 of 9 verdicts — `watchdog-timeout`,
+`background-task-overrun`, `cxx-terminate`, precisely the three whose support comes from a
+single artifact — and leaves every other verdict standing (`uncaught-objc-exception` 5→4,
+`null-dereference` 5→4, `swift-fatal-trap` 6→5, all still `strong`).
+
+It is **not** the default, and should not be adopted as-is. Capping at the channel maximum
+means a channel contributes at most 3, because 3 tops the weight scale — so `≥4 strong`
+under capping silently becomes the invariant *no single artifact can ever produce a
+verdict*. Nobody argued for that rule; it fell out of composing two independently chosen
+numbers, and it is wrong on its face (0x8badf00d alone is sufficient evidence). The three
+demotions above are that invariant firing, not the model becoming more honest. Taking the
+max is also the most aggressive possible collapse: the second and third Facts in a channel
+contribute exactly zero, which is as wrong as full independence in the other direction.
+
+Channel capping is deliberately limited to same-artifact correlation, because the source
+artifact is derivable and "same underlying event" is not. Cross-artifact correlation
+survives, and the corpus's sharpest case is one of them: on `null-deref-small-offset` the
+verdict rests on `registers.far`, a weight-1 corroboration whose own ground truth says its
+value *equals* the `exception.subtype` address the primary weight-3 Fact was parsed from.
+Two artifacts, one number, read twice, and the second reading is what clears `strong`.
+
+**The weights and the ≥4 / +2 thresholds are uncalibrated.** They were chosen, not
+derived. Every fixture with established ground truth is one the rules were written
+against, so the corpus is a training set; held-out real reports with independently
+established causes: none. Until that exists, `strong` means "these chosen weights summed
+past this chosen threshold" and no claim about precision-at-verdict is supportable.
+`DiagnosisAblation` is the stopgap: it withholds one Fact at a time and re-runs Stages 2–3,
+which measures what each verdict actually rests on without needing new data. Two things it
+found that reading `supporting` lists cannot show — a weight-1 Fact carrying a verdict
+(above), and Facts that are load-bearing through *another* rule's `contradicting` list,
+defending the ≥2 margin rather than the winner's own band (`stack-overflow` loses its
+verdict when the STACK GUARD Fact is withheld, with the winning score unmoved at 5).
+
+### What a real fix looks like
+
+Neither limit above is fixed. What exists today is an instrument (`DiagnosisAblation`), a
+measured-but-unadopted remedy (`Scoring.channelCapped`), and this record. The default
+scoring path is unchanged, so every over-count described above is still live in
+`crashdx analyze` output. Anyone picking this up should start from that.
+
+**1. Redesign the weight scale and the bands together, then adopt capping.** Capping
+summation alone is what produced the bogus "two artifacts minimum" invariant. The scale
+and the bands have to move with it:
+
+- Add a tier above `3` for Facts that are sufficient alone (0x8badf00d for watchdog,
+  0xdead10cc for background-task-overrun, an `EXC_RESOURCE`/`MEMORY` subtype for jetsam).
+  Reserve it strictly: pathognomonic means "no other cause produces this", not "strong".
+- Re-derive the bands against the new scale so a lone top-tier Fact reaches `strong` on
+  its own, and re-check the ≥2 margin, which was chosen against additive totals too.
+- Consider softening the collapse from `max` to `max + 1 if ≥2 Facts agree in-channel`, so
+  redundant renderings are worth something but not full price. This is a guess and should
+  be chosen by measurement, not asserted.
+- `DiagnosisAblationTests` pins today's numbers (`demoted`, `singleChannelVerdicts`).
+  Those expectations are a **record of the current state, not a specification** — a
+  legitimate re-derivation SHOULD fail them. Re-measure and rewrite them deliberately;
+  do not edit the arrays to make a build green.
+
+**2. Model cross-artifact correlation, or decide not to.** `EvidenceChannel` groups by
+source artifact because that is derivable from `Fact.sourcePath` and stays correct as
+extractors are added. It therefore cannot catch correlation that spans artifacts, which is
+where the sharpest case in the corpus lives (`registers.far` duplicating the
+`exception.subtype` address, above). The options are to hand-declare an event group per
+Fact — which reintroduces exactly the drift hand-tuned weights already suffer from, and
+should not be done without a test that fails when a rule forgets — or to leave it and have
+rules cite the duplicate at weight 0. Prefer the second until there is evidence the first
+pays for itself.
+
+Note also that `EvidenceChannel.of` is a string-prefix match on `sourcePath`: an extractor
+emitting an unrecognised root lands in `.other` and is scored uncapped. That fails open by
+design, and `everyExtractedFactClassifiesToAKnownChannel` guards it, but only for Facts the
+fixtures actually produce — several sentinel and x86 register Facts are never exercised.
+
+**3. Calibration needs data, and nothing in this repo substitutes for it.** Ablation
+measures internal sensitivity against the same reports the rules were written from; it is
+an easier adjacent question, not a partial answer. Required, in order:
+
+- Held-out real reports with causes established independently (a fix commit, a bug report
+  resolution), never inspected while tuning. Anonymisation is *not* the blocker —
+  `Scripts/scrub-fixture.py` and the CI gate already solve it. Sourcing is.
+- Report **precision-at-verdict** (of reports where `status == verdict`, how often the
+  verdict is the true cause) and the inconclusive rate separately. Do not report accuracy:
+  the design deliberately trades recall for precision, so a low recall number reads as
+  failure when it is the intent.
+- Cheaper interim, still not calibration: mutation testing. Perturb a fixture in ways that
+  must not change the cause (renumber threads, strip symbols, swap architecture) and
+  assert the verdict is stable. It at least tests against something other than the
+  training set.
 
 ## Output contract
 

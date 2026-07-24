@@ -74,7 +74,13 @@ struct MemoryFactsExtractor: EvidenceExtractor {
             }
         }
 
-        var nearStackReasons: [String] = []
+        // Each reason carries the path it was actually read from: this Fact fires from
+        // `vmregioninfo`, from the thread's `sp`, or from both, and hardcoding
+        // "vmregioninfo" mislabelled the sp-only case — breaking `Fact.sourcePath`'s
+        // "any consumer can verify it against the source file" contract, and (since
+        // `EvidenceChannel` derives the channel from `sourcePath`) filing a thread-state
+        // observation under the vm-region channel.
+        var nearStackReasons: [(text: String, path: String)] = []
 
         if let vmregioninfo = payload.vmregioninfo {
             if let regionType = Self.containingRegionType(in: vmregioninfo) {
@@ -86,7 +92,7 @@ struct MemoryFactsExtractor: EvidenceExtractor {
                 ))
             }
             if vmregioninfo.lowercased().contains("stack guard") {
-                nearStackReasons.append("vmregioninfo names a STACK GUARD region")
+                nearStackReasons.append(("vmregioninfo names a STACK GUARD region", "vmregioninfo"))
             }
         }
 
@@ -96,15 +102,19 @@ struct MemoryFactsExtractor: EvidenceExtractor {
             let spU = UInt64(bitPattern: Int64(sp))
             let distance = address > spU ? address - spU : spU - address
             if distance < arch.pageSize {
-                nearStackReasons.append("within \(distance) bytes of sp (\(Self.hex(spU)))")
+                nearStackReasons.append((
+                    "within \(distance) bytes of sp (\(Self.hex(spU)))",
+                    "threads[\(faultingIdx)].threadState.\(arch.stackPointerRegister)"
+                ))
             }
         }
 
         if !nearStackReasons.isEmpty {
+            let joined = nearStackReasons.map(\.text).joined(separator: "; ")
             facts.append(Fact(
                 id: "memory.fault-address-near-stack",
-                statement: "Faulting address \(Self.hex(address)) is near the stack region: \(nearStackReasons.joined(separator: "; "))",
-                sourcePath: "vmregioninfo"
+                statement: "Faulting address \(Self.hex(address)) is near the stack region: \(joined)",
+                sourcePath: nearStackReasons[0].path
             ))
         }
 

@@ -65,12 +65,36 @@ public struct Diagnosis: Codable, Equatable, Sendable {
 /// New crash patterns are added by appending rules (and, if needed, extractors) to the
 /// default lists below — the engine itself does not change.
 public struct DiagnosisEngine: Sendable {
+    /// How Stage 3 combines a Hypothesis's cited Facts into a score.
+    public enum Scoring: String, Codable, Sendable, CaseIterable {
+        /// `Σ support − Σ contradiction`, every cited Fact counted independently. The
+        /// shipped behaviour and the one `docs/DESIGN.md`'s bands are written against.
+        case additive
+        /// Facts are pooled by `EvidenceChannel` and only the highest-weighted Fact in
+        /// each channel counts, on both sides: `Σ_channels max(support) − Σ_channels
+        /// max(contradiction)`. Stops a single source artifact from supplying several
+        /// renderings of one observation as if they were several observations — see
+        /// `EvidenceChannel`.
+        ///
+        /// EXPERIMENTAL, not the default: the `>= 4 strong` / `+2 margin` thresholds were
+        /// chosen against `additive` totals, so switching scoring without re-deriving
+        /// them demotes rules that legitimately rest on one pathognomonic Fact. Measure
+        /// with `DiagnosisAblation.compareScoring` before considering a default change.
+        case channelCapped
+    }
+
     public let extractors: [EvidenceExtractor]
     public let rules: [DiagnosisRule]
+    public let scoring: Scoring
 
-    public init(extractors: [EvidenceExtractor] = DiagnosisEngine.defaultExtractors, rules: [DiagnosisRule] = DiagnosisEngine.defaultRules) {
+    public init(
+        extractors: [EvidenceExtractor] = DiagnosisEngine.defaultExtractors,
+        rules: [DiagnosisRule] = DiagnosisEngine.defaultRules,
+        scoring: Scoring = .additive
+    ) {
         self.extractors = extractors
         self.rules = rules
+        self.scoring = scoring
     }
 
     public static let defaultExtractors: [EvidenceExtractor] = [
@@ -101,19 +125,54 @@ public struct DiagnosisEngine: Sendable {
     public func diagnose(_ file: IPSFile) -> Diagnosis {
         let facts = extractors.flatMap { $0.extract(from: file) }
         let hypotheses = rules.flatMap { $0.evaluate(facts: facts, file: file) }
-        return Self.rank(hypotheses: hypotheses, facts: facts)
+        return Self.rank(hypotheses: hypotheses, facts: facts, scoring: scoring)
     }
 
     // MARK: - Stage 3
 
+    /// Additive scoring against a bare set of present fact ids. Retained for callers that
+    /// have no Facts to hand (channel capping needs `sourcePath`, so it needs the Facts
+    /// themselves) — `score(_:facts:scoring:)` is the general entry point.
     static func score(_ hypothesis: Hypothesis, presentFactIDs: Set<String>) -> Int {
-        let support = hypothesis.supporting
-            .filter { presentFactIDs.contains($0.factID) }
-            .reduce(0) { $0 + $1.weight }
-        let contradiction = hypothesis.contradicting
-            .filter { presentFactIDs.contains($0.factID) }
-            .reduce(0) { $0 + $1.weight }
+        let support = weigh(hypothesis.supporting, presentFactIDs: presentFactIDs)
+        let contradiction = weigh(hypothesis.contradicting, presentFactIDs: presentFactIDs)
         return support - contradiction
+    }
+
+    static func score(_ hypothesis: Hypothesis, facts: [Fact], scoring: Scoring) -> Int {
+        switch scoring {
+        case .additive:
+            return score(hypothesis, presentFactIDs: Set(facts.map(\.id)))
+        case .channelCapped:
+            let byID = Dictionary(facts.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+            let support = weighCapped(hypothesis.supporting, factsByID: byID)
+            let contradiction = weighCapped(hypothesis.contradicting, factsByID: byID)
+            return support - contradiction
+        }
+    }
+
+    /// Σ of the weights of cited Facts that are actually present.
+    ///
+    /// De-duplicates by fact id first: `supporting` is an array, so a rule that cited the
+    /// same Fact twice would otherwise have it counted twice. No shipped rule does that,
+    /// but nothing in the type prevents it and the failure would be silent.
+    private static func weigh(_ cited: [WeightedFact], presentFactIDs: Set<String>) -> Int {
+        var maxWeightByID: [String: Int] = [:]
+        for ref in cited where presentFactIDs.contains(ref.factID) {
+            maxWeightByID[ref.factID] = max(maxWeightByID[ref.factID] ?? ref.weight, ref.weight)
+        }
+        return maxWeightByID.values.reduce(0, +)
+    }
+
+    /// Σ over channels of the single highest weight cited from that channel.
+    private static func weighCapped(_ cited: [WeightedFact], factsByID: [String: Fact]) -> Int {
+        var maxWeightByChannel: [String: Int] = [:]
+        for ref in cited {
+            guard let fact = factsByID[ref.factID] else { continue }
+            let key = EvidenceChannel.cappingKey(for: fact)
+            maxWeightByChannel[key] = max(maxWeightByChannel[key] ?? ref.weight, ref.weight)
+        }
+        return maxWeightByChannel.values.reduce(0, +)
     }
 
     static func band(for score: Int) -> RankedHypothesis.ConfidenceBand {
@@ -122,12 +181,10 @@ public struct DiagnosisEngine: Sendable {
         return .weak
     }
 
-    static func rank(hypotheses: [Hypothesis], facts: [Fact]) -> Diagnosis {
-        let presentFactIDs = Set(facts.map(\.id))
-
+    static func rank(hypotheses: [Hypothesis], facts: [Fact], scoring: Scoring = .additive) -> Diagnosis {
         let ranked = hypotheses
             .map { hyp -> RankedHypothesis in
-                let s = score(hyp, presentFactIDs: presentFactIDs)
+                let s = score(hyp, facts: facts, scoring: scoring)
                 return RankedHypothesis(hypothesis: hyp, score: s, band: band(for: s))
             }
             .sorted { lhs, rhs in
