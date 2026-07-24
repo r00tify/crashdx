@@ -115,8 +115,8 @@ Recorded because the model's simplicity hides both of these, not because either 
 **Correlated Facts count as independent evidence.** Nothing stops a rule citing several
 renderings of one observation. `WatchdogTimeoutRule` cites `termination.code`
 (0x8badf00d, 3), `termination.namespace` (1) and `termination.watchdog-event` (2) for a
-score of 6, but ReportCrash writes all three into one `termination` dict from one launchd
-decision. One signal, scored as three. Some rules already compensate by hand
+score of 6, but all three are ReportCrash rendering one watchdog kill three ways into one
+`termination` dict. One signal, scored as three. Some rules already compensate by hand
 (`UncaughtObjCExceptionRule` downgrades the faulting-thread `objc_exception_throw` to
 weight 1 when the LEB one already fired at 3); the engine does not enforce it.
 

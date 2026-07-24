@@ -7,9 +7,9 @@ import Foundation
 /// what may be a single underlying observation rendered three ways. The canonical example
 /// is `WatchdogTimeoutRule`: `termination.code` (0x8badf00d, weight 3),
 /// `termination.namespace` (weight 1) and `termination.watchdog-event` (weight 2) sum to
-/// 6, but ReportCrash writes all three into one `termination` dict from one launchd
-/// decision — the namespace and the reason text exist *because* the code is 0x8badf00d.
-/// One signal, scored as three.
+/// 6, but all three are ReportCrash rendering one watchdog kill three ways into one
+/// `termination` dict — the namespace and the reason text exist *because* the code is
+/// 0x8badf00d. One signal, scored as three.
 ///
 /// A channel is the unit `DiagnosisEngine.Scoring.channelCapped` collapses: within a
 /// channel only the single highest-weighted Fact counts.
@@ -26,10 +26,10 @@ public enum EvidenceChannel: String, Codable, Sendable, CaseIterable {
     /// (`memory.fault-address-null-page`, `-exactly-null`) are pure re-readings of the
     /// same number.
     case machException = "mach-exception"
-    /// The `termination` dict: launchd's/the kernel's stated reason for killing the
-    /// process, in whatever rendering — coded (`termination.code`), named
-    /// (`termination.namespace`), or freetext (`termination.reason-text` and the
-    /// watchdog/jetsam Facts mined out of it).
+    /// The `termination` dict: whichever OS component killed the process (the kernel,
+    /// jetsam, the watchdog, RunningBoard) stating why, in whatever rendering — coded
+    /// (`termination.code`), named (`termination.namespace`), or freetext
+    /// (`termination.reason-text` and the watchdog/jetsam Facts mined out of it).
     case termination
     /// Application Specific Information.
     case asi
