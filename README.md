@@ -29,6 +29,205 @@ There are no LLM calls in the engine: it produces verifiable facts and ranked
 interpretations, and leaves the narrative to whatever consumes them. See
 [docs/DESIGN.md](docs/DESIGN.md) for the full architecture.
 
+## Example output
+
+Everything below is real, unedited output from fixtures in this repo (elisions are marked).
+Paths are relative to the repo root, and the `--dsym` flags point at dSYMs the repo ships,
+so these reproduce as-is; use `swift run crashdx ...` if you have not installed the binary.
+
+### A verdict
+
+```
+$ crashdx analyze Tests/CrashDXCoreTests/Fixtures/nsexcrash.ips \
+      --dsym Tests/CrashDXCoreTests/Fixtures/nsexcrash.dSYM
+
+process:    nsexcrash
+bug_type:   309
+os:         macOS 26.3.1 (25D2128)
+exception:  EXC_CRASH (SIGABRT)
+terminated: Abort trap: 6
+faulting thread (15 frames):
+  libsystem_kernel.dylib  __pthread_kill
+  libsystem_pthread.dylib  pthread_kill
+  libsystem_c.dylib  abort
+  libc++abi.dylib  __abort_message
+  libc++abi.dylib  demangling_terminate_handler()
+  libobjc.A.dylib  _objc_terminate()
+  libc++abi.dylib  std::__terminate(void (*)())
+  libc++abi.dylib  __cxxabiv1::failed_throw(__cxxabiv1::__cxa_exception*)
+  libc++abi.dylib  __cxa_throw
+  libobjc.A.dylib  objc_exception_throw
+  CoreFoundation  -[NSException raise]
+  nsexcrash  throwingHelper() (main.swift:8)
+  nsexcrash  doWork() (main.swift:12)
+  nsexcrash  main (main.swift:15)
+  dyld  start
+last exception backtrace (7 frames):
+  CoreFoundation  __exceptionPreprocess
+  libobjc.A.dylib  objc_exception_throw
+  CoreFoundation  -[NSException raise]
+  nsexcrash  throwingHelper() (main.swift:8)
+  nsexcrash  doWork() (main.swift:12)
+  nsexcrash  main (main.swift:15)
+  dyld  start
+symbolication (engine: crashSymbolicator):
+  nsexcrash  symbolicated
+  libsystem_kernel.dylib  no_dsym
+  libsystem_pthread.dylib  no_dsym
+  ...
+DIAGNOSIS: Uncaught Objective-C exception (NSException)   (strong, score 5)
+  A lastExceptionBacktrace is present and an objc_exception_throw frame appears in it (or on the
+  faulting thread) — together these are pathognomonic for an uncaught NSException: `-raise` walked up
+  through objc_exception_throw and was never caught, so the runtime called terminate and aborted. The
+  asi "Terminating app due to uncaught exception" message is only corroboration when present; plain
+  CLI/Foundation processes never write it, so its absence is not evidence against this hypothesis.
+  evidence: lastExceptionBacktrace is present with 7 frame(s); lastExceptionBacktrace frame 1 matches
+            sentinel 'objc-exception-throw': objc_exception_throw; Faulting thread frame 9 matches
+            sentinel 'objc-exception-throw': objc_exception_throw
+  inspect:  nsexcrash throwingHelper() (main.swift:8)
+  confirm:  Symbolicate the app frames in lastExceptionBacktrace to find the throw site; Check the
+            asi/console log for the exception name and reason, if available
+  also considered: cxx-terminate (moderate, 2), abort-generic (weak, 1)
+```
+
+The `evidence` line cites the supporting facts the rule scored on, up to four, with a
+running total when there are more; each fact carries a path back into the original report,
+which `--json --tier standard` exposes. `also considered` is the full remainder of the
+ranked list, so you can see what the verdict beat and by how much.
+
+### An inconclusive result
+
+When the leading hypothesis is not strongly supported *and* clearly ahead, you get the
+candidates instead of a label:
+
+```
+$ crashdx analyze Tests/CrashDXCoreTests/Fixtures/synthetic/wild-address.ips \
+      --dsym corpus/fixtures/nullderef/nullderef.dSYM
+
+process:    synthetic-wild-address
+bug_type:   309
+os:         macOS 26.3.1 (25D2128)
+exception:  EXC_BAD_ACCESS (SIGSEGV)
+terminated: Segmentation fault: 11
+faulting thread (4 frames):
+  nullderef  readThroughNullPointer() (main.swift:9)
+  nullderef  run() (main.swift:13)
+  nullderef  main (main.swift:16)
+  dyld  start
+symbolication (engine: crashSymbolicator):
+  nullderef  symbolicated
+  dyld  no_dsym
+DIAGNOSIS: INCONCLUSIVE — competing hypotheses:
+  1. Wild pointer or use-after-free [wild-or-uaf-address]   (moderate, score 3)
+     The faulting address is outside the null page, and vmregioninfo reports it is not inside any known
+     VM region at all — consistent with either a WILD pointer (an uninitialized or garbage value used as
+     an address) or a USE-AFTER-FREE into memory the OS has since unmapped. This is deliberately a
+     lower-confidence hypothesis than null-dereference: absence of region information doesn't distinguish
+     between these two causes.
+     evidence: Faulting address: 0x1deadbeef; Exception type: EXC_BAD_ACCESS
+     inspect:  nullderef readThroughNullPointer() (main.swift:9)
+     confirm:  Re-run with Address Sanitizer enabled to catch the use-after-free at the free/access site;
+               Enable NSZombies (Malloc Scribble/Guard Malloc) to turn this into an immediate,
+               informative crash; Profile with Instruments' Allocations tool, recording reference counts
+```
+
+### Other crash families
+
+The same shape applies across the rule set. Verdict and evidence lines from four more
+fixtures, with the explanation and follow-up steps elided:
+
+```
+# synthetic/watchdog-scene-create.ips
+DIAGNOSIS: Watchdog timeout (main thread stall)   (strong, score 6)
+  evidence: Termination code: 2343432205 (0x8badf00d); Termination namespace: FRONTBOARD; Watchdog
+            event: scene-create, allowance 19.97s
+
+# synthetic/jetsam-per-process-limit.ips
+DIAGNOSIS: Jetsam memory kill   (strong, score 5)
+  evidence: Exception subtype: RESOURCE_TYPE_MEMORY; Jetsam per-process-limit indicator:
+            per-process-limit 350808KB exceeds task limit 335872KB
+
+# synthetic/stack-overflow.ips
+DIAGNOSIS: Stack overflow   (strong, score 5)
+  evidence: Faulting address 0x3000 is near the stack region: vmregioninfo names a STACK GUARD region;
+            within 500 bytes of sp (0x31f4); Faulting thread has 5 consecutive frames with identical
+            symbol 'recurse(_:)' starting at frame 0 — a recursion signature
+
+# crashspike-unsymbolicated.ips, with --dsym Tests/CrashDXCoreTests/Fixtures/crashspike.dSYM
+DIAGNOSIS: Swift runtime fatal trap   (strong, score 6)
+  evidence: Exception type: EXC_BREAKPOINT; Signal: SIGTRAP; Faulting thread frame 0 matches sentinel
+            'assertion-failure': _assertionFailure(_:_:file:line:flags:)
+```
+
+Each of those also prints the full explanation, `inspect` point, and `confirm` steps shown
+in the first example.
+
+### JSON
+
+`--json` emits the same analysis as a structured `AnalysisReport`, which is what the MCP
+server returns and what you would parse in CI. Below is the same crash as the first
+example, abridged (`/* ... */` marks elisions). The real output is a single minified line
+with sorted keys, so pipe it through `jq` or `python3 -m json.tool`; it is pretty-printed
+and reordered here for readability:
+
+```jsonc
+{
+  "schemaVersion": "0.2",
+  "tier": "summary",
+  "diagnosis": {
+    "status": "verdict",
+    "verdict": {
+      "id": "uncaught-objc-exception",
+      "title": "Uncaught Objective-C exception (NSException)",
+      "category": "objc-exception",
+      "explanation": "A lastExceptionBacktrace is present and an objc_exception_throw frame ...",
+      "supporting": [
+        { "factID": "leb.present", "weight": 1 },
+        { "factID": "leb.sentinel.objc-exception-throw", "weight": 3 },
+        { "factID": "frames.sentinel.objc-exception-throw", "weight": 1 }
+      ],
+      "contradicting": [],
+      "inspect": [
+        { "frameIndex": 3, "leb": true, "symbol": "throwingHelper()",
+          "sourceFile": "main.swift", "sourceLine": 8 }
+      ],
+      "confirmFurtherBy": [ /* ... */ ]
+    },
+    "hypotheses": [ /* all 3, each with its band + score */ ]
+  },
+  "event": {
+    "bugType": "309", "exceptionType": "EXC_CRASH", "signal": "SIGABRT",
+    "terminationIndicator": "Abort trap: 6", "terminationNamespace": "SIGNAL"
+  },
+  "faultingThread": { "index": 0, "queue": "com.apple.main-thread", "triggered": true,
+                      "frames": [ /* ... */ ] },
+  "symbolication": { "engine": "crashSymbolicator", "images": [ /* per-image outcome + uuid */ ] },
+  "process": { "name": "nsexcrash", "osVersion": "macOS 26.3.1 (25D2128)",
+               "captureTime": "2026-07-23 00:22:01.2793 +0000" }
+}
+```
+
+Note `"leb": true` on the inspect point: the throw site was recovered from
+`lastExceptionBacktrace` rather than the faulting thread, and the report says so instead of
+flattening the distinction.
+
+`--tier standard` (see [Report tiers](#report-tiers)) adds `diagnosis.factsConsidered`,
+which resolves every `factID` to its human-readable statement and its `sourcePath` into the
+raw report:
+
+```jsonc
+{ "id": "leb.sentinel.objc-exception-throw",
+  "statement": "lastExceptionBacktrace frame 1 matches sentinel 'objc-exception-throw': objc_exception_throw",
+  "sourcePath": "lastExceptionBacktrace[1]" }
+```
+
+`sourcePath` is not optional on a `Fact`, so every fact the diagnosis cites can be walked
+back to the part of the report it was read from.
+
+Committed golden snapshots of both
+tiers live in `Tests/CrashDXCoreTests/Fixtures/` (`nsexcrash-summary-golden.json`,
+`nullderef-standard-golden.json`) if you want the complete, unabridged shape.
+
 ## Requirements
 
 - macOS 14+
