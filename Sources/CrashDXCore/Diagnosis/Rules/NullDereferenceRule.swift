@@ -7,9 +7,15 @@ import Foundation
 /// access through a nil object/pointer — the offset is that field's byte offset).
 ///
 /// GROUND TRUTH (corpus/fixtures/nullderef, real fixture): `far.value == 0`, matching
-/// `exception.subtype`'s parsed address exactly — this rule cites `registers.far` as
-/// weight-1 corroboration ONLY (per `RegisterFactsExtractor`'s doc, never sole evidence),
-/// and only when its parsed value actually equals the faulting address.
+/// `exception.subtype`'s parsed address exactly. `registers.far` is cited at weight 0: it
+/// is kept in `supporting` so the evidence citation stays visible (the register really did
+/// corroborate the address), but it earns no score, because its value is a re-read of the
+/// same number `memory.fault-address-null-page` already parsed out of `exception.subtype`,
+/// not an independent observation. Scoring it at weight 1 (as this rule used to) let
+/// `null-deref-small-offset` reach `strong` on that duplicate alone — see
+/// `EvidenceChannel`'s doc for why source-artifact-based channel capping cannot catch this
+/// (the two Facts come from different artifacts) and `docs/DESIGN.md`'s "Known limits of
+/// the additive model" for the general problem this is one instance of.
 ///
 /// CONTRADICTING EVIDENCE: when `vmregioninfo` places the faulting address inside a STACK
 /// GUARD region, the kernel has *directly told us* what that memory is, which outranks the
@@ -42,7 +48,7 @@ struct NullDereferenceRule: DiagnosisRule {
            let threadState = payload.threads[faultingIdx].threadState,
            let far = RegisterFactsExtractor.registerValue(threadState, "far"),
            UInt64(bitPattern: Int64(far)) == address {
-            supporting.append(WeightedFact(factID: farFact.id, weight: 1))
+            supporting.append(WeightedFact(factID: farFact.id, weight: 0))
         }
 
         let explanation: String

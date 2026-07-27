@@ -207,6 +207,9 @@ in code.
 
   Every register value is a **decimal** integer
   (unlike `exception.codes`/`subtype`'s hex-string rendering). `far.value == 0` here,
-  exactly matching the parsed `exception.subtype` address: confirmed safe to use as
-  weight-1 corroboration (never sole evidence, per `docs/DESIGN.md`).
+  exactly matching the parsed `exception.subtype` address — this equality is exactly why
+  `NullDereferenceRule` cites `registers.far` at weight 0, not as corroboration: its value
+  is a re-read of the same number `exception.subtype` already supplied, not an independent
+  observation (see the rule's doc comment and `docs/DESIGN.md`'s "Known limits of the
+  additive model").
 - `asi` is absent entirely on this fixture (no `asiRaw`).

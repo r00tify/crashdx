@@ -104,12 +104,19 @@ private func mutatedFixture(_ name: String, subdirectory: String, _ mutate: (ino
     }
 
     @Test func nullDereferenceFiresOnSyntheticSmallOffsetBranch() throws {
+        // This fixture has no `exactlyNull` fact, so its only supporting evidence is the
+        // weight-3 null-page fact plus `registers.far` — cited at weight 0 because its
+        // value duplicates the address the null-page fact was already parsed from (see
+        // NullDereferenceRule's doc). Score 3, band `.moderate`, not a confident verdict.
+        // Before that fix this fixture cleared `strong` on the duplicate alone.
         let file = try loadFixture("null-deref-small-offset", subdirectory: "Fixtures/synthetic")
         let diagnosis = DiagnosisEngine().diagnose(file)
 
-        #expect(diagnosis.verdict?.id == "null-dereference")
+        #expect(diagnosis.status == .inconclusive)
+        #expect(diagnosis.verdict == nil)
         let ranked = try #require(diagnosis.hypotheses.first { $0.hypothesis.id == "null-dereference" })
-        #expect(ranked.band == .strong)
+        #expect(ranked.score == 3)
+        #expect(ranked.band == .moderate)
         #expect(ranked.hypothesis.explanation.contains("FIELD"))
         #expect(!ranked.hypothesis.explanation.contains("true nil-pointer dereference"))
         #expect(!diagnosis.factsConsidered.contains { $0.id == "memory.fault-address-exactly-null" })

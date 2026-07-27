@@ -104,12 +104,12 @@
             },
             {
               "factID" : "registers.far",
-              "weight" : 1
+              "weight" : 0
             }
           ],
           "title" : "Null-pointer dereference"
         },
-        "score" : 5
+        "score" : 4
       }
     ],
     "status" : "verdict",
@@ -142,7 +142,7 @@
         },
         {
           "factID" : "registers.far",
-          "weight" : 1
+          "weight" : 0
         }
       ],
       "title" : "Null-pointer dereference"

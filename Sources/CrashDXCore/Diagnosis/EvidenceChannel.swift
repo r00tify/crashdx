@@ -94,18 +94,18 @@ public enum EvidenceChannel: String, Codable, Sendable, CaseIterable {
     /// `exception.subtype` (`EXC_RESOURCE ... MEMORY`, weight 3, `machException`) plus
     /// `termination.jetsam-per-process-limit` (weight 2, `termination`) — two artifacts,
     /// two channels, so capping changes nothing and the verdict still rests on one kernel
-    /// decision to kill for memory, counted twice.
+    /// decision to kill for memory, counted twice. This is the standing example.
     ///
-    /// The sharper case is `null-deref-small-offset`, where the weight-1 `registers.far`
-    /// Fact is what lifts the score to `strong` even though
-    /// `RegisterFactsExtractor`'s ground truth says `far.value` EQUALS the
-    /// `exception.subtype` address the weight-3 Fact was parsed from. One number, two
-    /// artifacts, and capping preserves the verdict.
-    ///
-    /// Catching either needs an event-level grouping this enum deliberately does not
-    /// model, because "same event" cannot be derived from the payload and would have to be
-    /// hand-declared per Fact — reintroducing exactly the drift that hand-tuned weights
-    /// already suffer from.
+    /// `null-deref-small-offset` used to be the sharper case: the weight-1 `registers.far`
+    /// Fact lifted the score to `strong` even though `RegisterFactsExtractor`'s ground
+    /// truth says `far.value` EQUALS the `exception.subtype` address the weight-3 Fact was
+    /// parsed from. Fixed directly rather than by modeling event-level grouping:
+    /// `NullDereferenceRule` now cites `registers.far` at weight 0, since its value is a
+    /// re-read, not independent corroboration. That doesn't generalize; catching the
+    /// jetsam case (or the next one) needs an event-level grouping this enum deliberately
+    /// does not model, because "same event" cannot be derived from the payload and would
+    /// have to be hand-declared per Fact — reintroducing exactly the drift that hand-tuned
+    /// weights already suffer from.
     public static let residualCorrelationNote = """
         Channel capping collapses same-artifact correlation only. Cross-artifact \
         correlation (e.g. EXC_RESOURCE/MEMORY in `exception` alongside a jetsam \

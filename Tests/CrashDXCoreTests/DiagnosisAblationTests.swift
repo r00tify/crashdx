@@ -254,45 +254,56 @@ private func fixtureURLs() throws -> [(name: String, url: URL)] {
 
     // MARK: - Findings the corpus-wide sweep turned up, pinned individually
 
-    @Test func nullDerefSmallOffsetVerdictRestsOnAWeight1RegisterFact() throws {
-        // `registers.far` is documented as corroboration that must never be sole evidence,
-        // and is cited at weight 1 accordingly. On this fixture it is nonetheless the Fact
-        // that produces the verdict: 3 (null page) + 1 (far) = 4 clears `strong` by exactly
-        // the weight-1 fact, and withholding it drops the diagnosis to inconclusive.
+    @Test func nullDerefSmallOffsetDuplicateRegisterFactNoLongerCarriesTheVerdict() throws {
+        // Previously `registers.far` was cited at weight 1 and was, on this fixture, the
+        // Fact that produced the verdict: 3 (null page) + 1 (far) = 4 cleared `strong` by
+        // exactly that one weight-1 fact — a residual cross-artifact correlation
+        // `EvidenceChannel` deliberately does not model, since `far` lives in `threadState`
+        // and the null-page Fact is parsed from `exception.subtype`, so channel capping
+        // treated them as independent. But `RegisterFactsExtractor`'s own ground truth is
+        // that `far.value` EQUALS the subtype address on every real EXC_BAD_ACCESS
+        // examined: two artifacts, one number, and the verdict rested on reading it twice.
         //
-        // This is the residual cross-artifact correlation `EvidenceChannel` deliberately
-        // does not model, in its sharpest form. `far` lives in `threadState` and the null-
-        // page Fact is parsed from `exception.subtype`, so channel capping treats them as
-        // independent and preserves the verdict — but `RegisterFactsExtractor`'s own ground
-        // truth is that `far.value` EQUALS the subtype address on every real EXC_BAD_ACCESS
-        // examined. Two artifacts, one number. The verdict here rests on reading it twice.
+        // Fixed by citing `registers.far` at weight 0 in `NullDereferenceRule` (see its doc
+        // comment). This test now pins the opposite of what it used to: the duplicate Fact
+        // is still cited (the corroboration is real, just not independent evidence), but
+        // withholding it moves nothing, and the fixture honestly lands at `.inconclusive`
+        // rather than a verdict propped up by a re-read number.
         let url = try #require(Bundle.module.url(
             forResource: "null-deref-small-offset", withExtension: "ips", subdirectory: "Fixtures/synthetic"
         ))
         let result = DiagnosisAblation().run(try IPSFile.parse(contentsOf: url))
-        #expect(result.baseline.verdict?.id == "null-dereference")
-        #expect(result.baseline.hypotheses.first?.score == 4)
+        #expect(result.baseline.status == .inconclusive)
+        #expect(result.baseline.hypotheses.first?.hypothesis.id == "null-dereference")
+        #expect(result.baseline.hypotheses.first?.score == 3)
 
         let far = try #require(result.impacts.first { $0.fact.id == "registers.far" })
-        #expect(far.changesOutcome)
+        #expect(!far.changesOutcome)
         #expect(far.ablatedScoreOfBaselineTop == 3)
         #expect(far.ablatedStatus == .inconclusive)
 
-        // Channel capping does not rescue this: the duplication crosses artifacts.
+        // Channel capping agrees with additive now — there's no cross-channel duplicate
+        // left for it to fail to catch.
         let comparison = DiagnosisAblation.compareScoring(file: try IPSFile.parse(contentsOf: url))
-        #expect(comparison.capped.verdict?.id == "null-dereference")
-        #expect(comparison.rows.first?.capped == 4)
+        #expect(comparison.capped.verdict == nil)
+        #expect(comparison.rows.first?.capped == 3)
     }
 
-    @Test func aSingleFactCanBeLoadBearingThroughAnotherRulesContradiction() throws {
-        // Ablation catches a dependency that reading `supporting` alone cannot: on
-        // stack-overflow, withholding the STACK GUARD vmregion Fact leaves the winning
-        // score untouched at 5 and still loses the verdict. The Fact is cited by
-        // `NullDereferenceRule` as a weight-3 CONTRADICTION, so removing it lifts the
-        // runner-up from 1 to 4 and collapses the >= 2 margin.
+    @Test func stackGuardContradictionIsNoLongerLoadBearingAfterTheFarFactFix() throws {
+        // This used to demonstrate a dependency reading `supporting` alone can't show: on
+        // stack-overflow, withholding the STACK GUARD vmregion Fact left the winning score
+        // untouched at 5 but still lost the verdict, because the Fact is cited by
+        // `NullDereferenceRule` as a weight-3 CONTRADICTION, and removing it lifted the
+        // runner-up from 1 to 4, collapsing the >= 2 margin.
         //
-        // The margin, not the band, is what these Facts defend — which means a rule's
-        // `contradicting` list is load-bearing for OTHER rules' verdicts.
+        // Fixing `registers.far`'s cross-artifact duplicate (see NullDereferenceRule's doc)
+        // incidentally closed this too: null-dereference's runner-up score without the
+        // guard contradiction is now 3 (moderate), not 4 (strong) — the point `far` used to
+        // contribute is gone — so the margin (5 - 3 = 2) holds on its own and the verdict
+        // survives the ablation. The general mechanism this test named — a rule's
+        // `contradicting` list can be load-bearing for another rule's margin — still holds
+        // in principle; the corpus just has no live example of it left, which is itself
+        // worth re-checking whenever weights or a new rule change the runner-up's score.
         let url = try #require(Bundle.module.url(
             forResource: "stack-overflow", withExtension: "ips", subdirectory: "Fixtures/synthetic"
         ))
@@ -302,10 +313,11 @@ private func fixtureURLs() throws -> [(name: String, url: URL)] {
         let guardFact = try #require(
             result.impacts.first { $0.fact.id == "memory.fault-address-in-vmregion-stack-guard" }
         )
-        #expect(guardFact.changesOutcome)
+        #expect(!guardFact.changesOutcome)
         #expect(guardFact.ablatedScoreOfBaselineTop == 5)  // winner's own score is unmoved
-        #expect(guardFact.ablatedStatus == .inconclusive)
-        #expect(!guardFact.changesTopHypothesis)           // it still wins, just not by enough
+        #expect(guardFact.ablatedStatus == .verdict)
+        #expect(guardFact.ablatedVerdictID == "stack-overflow")
+        #expect(!guardFact.changesTopHypothesis)
     }
 
     @Test func scoringComparisonAcrossEveryFixture() throws {
@@ -324,21 +336,33 @@ private func fixtureURLs() throws -> [(name: String, url: URL)] {
         print(report)
 
         // The measured cost of removing same-artifact double counting, pinned so the
-        // trade-off stays visible: 3 of the corpus's 9 verdicts, exactly the 3 whose
-        // support comes from a single artifact. Every other verdict survives, because the
-        // memory/frame/LEB rules genuinely combine artifacts and lose only the redundant
-        // portion (uncaught-objc 5->4, null-dereference 5->4, swift-fatal-trap 6->5, all
-        // still `strong`).
+        // trade-off stays visible. The corpus ships 8 verdicts today under `additive`, one
+        // fewer than before `null-deref-small-offset`'s own `registers.far` duplicate was
+        // fixed: that fixture no longer reaches `strong` under the shipped scoring at all,
+        // so it isn't part of this 8 and can't appear in `demoted` below.
         //
-        // Whether these 3 SHOULD be demoted is a threshold question, not a scoring-
-        // mechanics one: 0x8badf00d is pathognomonic, so a verdict off that one Fact is
-        // defensible, but `strong >= 4` cannot express "one Fact is enough" while the
-        // weight convention caps a single Fact at 3. Reconciling that means re-deriving
-        // the bands, which needs evidence this repo does not have. Hence `additive`
-        // remains the default and this test records the gap rather than closing it.
+        // Of those 8, channel capping demotes 4. Three demote because their support comes
+        // from a single artifact (watchdog-timeout, background-task-overrun, cxx-terminate).
+        // The fourth, null-dereference on the real `nullderef` fixture, is a different
+        // shape: fixing NullDereferenceRule's cross-artifact `registers.far` duplicate (see
+        // its doc comment) removed the one point that used to keep its capped score at the
+        // `strong` floor, exposing that its `mach-exception` channel alone — `-null-page`
+        // and `-exactly-null` pooled to their max of 3 — caps out one short. The remaining 4
+        // verdicts survive, because the memory/frame/LEB rules genuinely combine artifacts
+        // and lose only the redundant portion (uncaught-objc 5->4, swift-fatal-trap 6->5,
+        // jetsam-memory-kill and stack-overflow unmoved at 5, all still `strong`).
+        //
+        // Whether these 4 SHOULD be demoted is a threshold question, not a scoring-
+        // mechanics one: 0x8badf00d is pathognomonic, so is a fault address of exactly
+        // zero, so a verdict off one such Fact is defensible, but `strong >= 4` cannot
+        // express "one Fact is enough" while the weight convention caps a single Fact at 3.
+        // Reconciling that means re-deriving the bands, which needs evidence this repo does
+        // not have. Hence `additive` remains the default and this test records the gap
+        // rather than closing it.
         #expect(demoted.sorted() == [
             "cxx-terminate-only: cxx-terminate -> none",
             "dead10cc: background-task-overrun -> none",
+            "nullderef: null-dereference -> none",
             "watchdog-scene-create: watchdog-timeout -> none",
         ])
     }

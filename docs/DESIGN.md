@@ -39,8 +39,9 @@ any consumer can verify it. The six extractors:
   from exception codes / `vmregioninfo`; classification inputs: address==0, address < page
   size (null + field offset), address in a named VM region, address near the stack pointer
   (overflow).
-- **RegisterFacts** (from `threadState`): pc/lr/far where present; used to corroborate,
-  never as sole evidence.
+- **RegisterFacts** (from `threadState`): pc/lr/far where present. Only `far` is currently
+  cited by any rule (`NullDereferenceRule`, at weight 0 — see "Known limits of the additive
+  model"); no rule should guard on a `registers.*` fact alone regardless.
 - **ASIFacts**: messages, parsed uncaught-exception name/reason. GROUND TRUTH CONSTRAINT:
   CLI/Foundation processes never carry the uncaught-exception message in asi; absence of
   it is NOT evidence against an NSException crash. Uncaught-NSException detection must
@@ -122,27 +123,41 @@ weight 1 when the LEB one already fired at 3); the engine does not enforce it.
 
 `EvidenceChannel` + `DiagnosisEngine.Scoring.channelCapped` are the measured, opt-in
 alternative: Facts pool by source artifact (derived from `Fact.sourcePath`) and only the
-highest weight in each pool counts, on both the supporting and contradicting side. Across
-the fixture corpus that demotes 3 of 9 verdicts — `watchdog-timeout`,
-`background-task-overrun`, `cxx-terminate`, precisely the three whose support comes from a
-single artifact — and leaves every other verdict standing (`uncaught-objc-exception` 5→4,
-`null-dereference` 5→4, `swift-fatal-trap` 6→5, all still `strong`).
+highest weight in each pool counts, on both the supporting and contradicting side. The
+corpus ships 8 verdicts today, one fewer than before `null-deref-small-offset`'s own
+`registers.far` duplicate was fixed (below) — that fixture no longer reaches `strong` even
+under the shipped `additive` scoring, so it is not part of this comparison at all. Of the
+remaining 8, channel capping demotes 4 — `watchdog-timeout`, `background-task-overrun`,
+`cxx-terminate`, and `null-dereference` on the real `nullderef` fixture — and leaves the
+rest standing (`uncaught-objc-exception` 5→4, `swift-fatal-trap` 6→5, `jetsam-memory-kill`
+and `stack-overflow` unmoved at 5, all still `strong`).
+
+`null-dereference` is demoted for a different reason than the other three: its support
+isn't concentrated in one channel, it's that fixing the cross-artifact duplicate below
+(`registers.far`, now cited at weight 0) left the `mach-exception` channel — which already
+pools `-null-page` and `-exactly-null` to their max of 3 — with nothing outside it to add.
+A textbook null-at-address-0 crash, arguably as pathognomonic as 0x8badf00d, caps out one
+point short of `strong`. That's the weight-scale gap point 1 below describes, surfaced by
+this fix rather than caused by it.
 
 It is **not** the default, and should not be adopted as-is. Capping at the channel maximum
 means a channel contributes at most 3, because 3 tops the weight scale — so `≥4 strong`
 under capping silently becomes the invariant *no single artifact can ever produce a
 verdict*. Nobody argued for that rule; it fell out of composing two independently chosen
-numbers, and it is wrong on its face (0x8badf00d alone is sufficient evidence). The three
-demotions above are that invariant firing, not the model becoming more honest. Taking the
-max is also the most aggressive possible collapse: the second and third Facts in a channel
-contribute exactly zero, which is as wrong as full independence in the other direction.
+numbers, and it is wrong on its face (0x8badf00d alone is sufficient evidence). Three of
+the four demotions above (`watchdog-timeout`, `background-task-overrun`, `cxx-terminate`)
+are that invariant firing, not the model becoming more honest — the fourth,
+`null-dereference`, is the different case explained above. Taking the max is also the most
+aggressive possible collapse: the second and third Facts in a channel contribute exactly
+zero, which is as wrong as full independence in the other direction.
 
 Channel capping is deliberately limited to same-artifact correlation, because the source
 artifact is derivable and "same underlying event" is not. Cross-artifact correlation
-survives, and the corpus's sharpest case is one of them: on `null-deref-small-offset` the
-verdict rests on `registers.far`, a weight-1 corroboration whose own ground truth says its
-value *equals* the `exception.subtype` address the primary weight-3 Fact was parsed from.
-Two artifacts, one number, read twice, and the second reading is what clears `strong`.
+mostly survives; the corpus's sharpest former case, `null-deref-small-offset` resting its
+verdict on `registers.far` (a weight-1 corroboration whose value duplicated the
+`exception.subtype` address the primary weight-3 Fact was parsed from), is fixed:
+`NullDereferenceRule` now cites `registers.far` at weight 0, per option 2 below. The
+standing example is `jetsam-memory-kill` — see `EvidenceChannel.residualCorrelationNote`.
 
 **The weights and the ≥4 / +2 thresholds are uncalibrated.** They were chosen, not
 derived. Every fixture with established ground truth is one the rules were written
@@ -151,10 +166,14 @@ established causes: none. Until that exists, `strong` means "these chosen weight
 past this chosen threshold" and no claim about precision-at-verdict is supportable.
 `DiagnosisAblation` is the stopgap: it withholds one Fact at a time and re-runs Stages 2–3,
 which measures what each verdict actually rests on without needing new data. Two things it
-found that reading `supporting` lists cannot show — a weight-1 Fact carrying a verdict
-(above), and Facts that are load-bearing through *another* rule's `contradicting` list,
-defending the ≥2 margin rather than the winner's own band (`stack-overflow` loses its
-verdict when the STACK GUARD Fact is withheld, with the winning score unmoved at 5).
+found that reading `supporting` lists cannot show — a weight-1 Fact carrying a verdict (the
+`null-deref-small-offset` case above, before its fix), and Facts that can be load-bearing
+through *another* rule's `contradicting` list, defending the ≥2 margin rather than the
+winner's own band. `stack-overflow` used to lose its verdict when the STACK GUARD Fact
+(cited by `NullDereferenceRule` as a contradiction) was withheld, with the winning score
+unmoved at 5 — fixing `registers.far` closed this too, incidentally: null-dereference's
+runner-up score without the guard contradiction is now 3, not 4, so the margin holds
+without it. The mechanism is still real; the corpus currently has no live example of it.
 
 ### What a real fix looks like
 
@@ -182,13 +201,14 @@ and the bands have to move with it:
 
 **2. Model cross-artifact correlation, or decide not to.** `EvidenceChannel` groups by
 source artifact because that is derivable from `Fact.sourcePath` and stays correct as
-extractors are added. It therefore cannot catch correlation that spans artifacts, which is
-where the sharpest case in the corpus lives (`registers.far` duplicating the
-`exception.subtype` address, above). The options are to hand-declare an event group per
-Fact — which reintroduces exactly the drift hand-tuned weights already suffer from, and
-should not be done without a test that fails when a rule forgets — or to leave it and have
-rules cite the duplicate at weight 0. Prefer the second until there is evidence the first
-pays for itself.
+extractors are added. It therefore cannot catch correlation that spans artifacts. The
+options are to hand-declare an event group per Fact — which reintroduces exactly the drift
+hand-tuned weights already suffer from, and should not be done without a test that fails
+when a rule forgets — or to leave it and have rules cite the duplicate at weight 0.
+`NullDereferenceRule`'s `registers.far` citation (above) took the second option; the
+standing case for whoever tackles the first is `jetsam-memory-kill`, see
+`EvidenceChannel.residualCorrelationNote`. Prefer the second until there is evidence the
+first pays for itself.
 
 Note also that `EvidenceChannel.of` is a string-prefix match on `sourcePath`: an extractor
 emitting an unrecognised root lands in `.other` and is scored uncapped. That fails open by

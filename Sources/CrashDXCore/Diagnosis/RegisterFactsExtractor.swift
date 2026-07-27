@@ -1,15 +1,17 @@
 import Foundation
 
 /// `far`/`pc`/`lr` from the faulting thread's `threadState` (ARM64/`ARM_THREAD_STATE64`).
-/// Per `docs/DESIGN.md`: "used to corroborate, never as sole evidence" — no rule
-/// should guard on a `registers.*` fact alone; rules use it only as a weight-1
-/// addition once their primary evidence already applies.
+/// `far` is cited only by `NullDereferenceRule`, and only at weight 0: `far.value` was
+/// observed to equal `exception.subtype`'s parsed address exactly in both real
+/// `EXC_BAD_ACCESS` samples examined, so it is a re-read of the same number, not an
+/// independent observation. It stays in `supporting` for evidence-citation visibility but
+/// earns no score — see `NullDereferenceRule`'s doc comment and `docs/DESIGN.md`'s "Known
+/// limits of the additive model". `pc`/`lr` are extracted but not currently cited by any
+/// rule; no rule should guard on a `registers.*` fact alone regardless.
 ///
 /// GROUND TRUTH (verified against real corpus/raw/contactsd + corpus/fixtures/
 /// nullderef `threadState`): `far`/`pc`/`lr`/`sp`/`fp` are each `{"value": N}` with N a
-/// DECIMAL integer (not a hex string) — `far.value` was observed to equal
-/// `exception.subtype`'s parsed address exactly in both real `EXC_BAD_ACCESS` samples
-/// examined, confirming it's safe corroboration for `NullDereferenceRule`.
+/// DECIMAL integer (not a hex string).
 struct RegisterFactsExtractor: EvidenceExtractor {
     init() {}
 
